@@ -17,6 +17,14 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-exp|Win32">
+      <Configuration>Release-exp</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-exp|x64">
+      <Configuration>Release-exp</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release_NoLibs|Win32">
       <Configuration>Release_NoLibs</Configuration>
       <Platform>Win32</Platform>
@@ -38,6 +46,7 @@
     <ProjectGuid>{76EFC06C-1F64-4478-ABE8-79832716B393}</ProjectGuid>
     <RootNamespace>libtsk</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoLibs|Win32'" Label="Configuration">
@@ -51,10 +60,16 @@
     <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -63,10 +78,16 @@
     <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -82,7 +103,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -96,10 +117,16 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|x64'" Label="PropertySheets">
@@ -119,17 +146,35 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-exp|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'">$(OutDir)</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|x64'">$(OutDir)</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-exp|Win32'">$(IntDir)</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|Win32'">$(IntDir)</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'">$(IntDir)</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|x64'">$(IntDir)</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoLibs|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoLibs|x64'">$(OutDir)</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoLibs|Win32'">$(IntDir)</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_NoLibs|x64'">$(IntDir)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>$(ProjectName)-x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|Win32'">
+    <TargetName>$(ProjectName)-x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName)-x64</TargetName>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'">
+    <TargetName>$(ProjectName)-x64</TargetName>
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\NugetPackages.props" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -176,26 +221,67 @@ copy "$(LibVhdiLib)\libvhdi.dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\;$(TskNugetIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBZ;HAVE_LIBVMDK;HAVE_LIBVHDI;WIN32;NDEBUG;_LIB;WINVER=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf.legacy-20140809\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\aff4-cpp-lite\src;$(ProjectDir)..\..\..\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBBDE;HAVE_LIBEWF;HAVE_LIBZ;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBAFF4;HAVE_LIBOPENSSL;WIN32;NDEBUG;_LIB;WINVER=0x0501;HAVE_LIBEWF_V2_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <PreBuildEvent>
-      <Command>copy "$(LibEwfLib)\libewf.dll" "$(OutDir)"
-copy "$(ZlibDll)\zlib.dll" "$(OutDir)"
-copy "$(LibVmdkLib)\libvmdk.dll" "$(OutDir)"
-copy "$(LibVhdiLib)\libvhdi.dll" "$(OutDir)"
-xcopy /E /Y "$(UniversalCRTSdkDir)\redist\ucrt\DLLS\$(PlatformTarget)" "$(OutDir)"
-xcopy /E /Y "$(VCInstallDir)\redist\$(PlatformTarget)\Microsoft.VC140.CRT" "$(OutDir)"</Command>
+      <Command>copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\Release\libewf-x86.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\Release\libvmdk-x86.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\Release\libvhdi-x86.dll" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.dll" "$(OutDir)"
+
+
+copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\Release\libewf-x86.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\Release\libvmdk-x86.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\Release\libvhdi-x86.pdb" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.pdb" "$(OutDir)"</Command>
     </PreBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release;$(ProjectDir)..\..\..\AFFLIBv3\win32\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win32.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlib-x86.lib;libewf-x86.lib;libvhdi-x86.lib;libvmdk-x86.lib;libaff4-x86.lib;libcrypto.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\;$(SolutionDir)..\..\libvmdk\include;$(SolutionDir)..\..\libvhdi\include;$(SolutionDir)..\..\libewf.experimental-a791283c87b6ffff417372a24\include;$(SolutionDir)..\..\zlib;$(SolutionDir)..\..\aff4-cpp-lite\src;$(SolutionDir)..\..\openssl-1.1.1\win32.libs\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBBDE;HAVE_LIBEWF;HAVE_LIBZ;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBAFF4;HAVE_LIBOPENSSL;WIN32;NDEBUG;_LIB;WINVER=0x0501;HAVE_LIBEWF_V2_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+    </ClCompile>
+    <PreBuildEvent>
+      <Command>copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\Release\libewf-x86.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\Release\libvmdk-x86.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\Release\libvhdi-x86.dll" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.dll" "$(OutDir)"
+
+
+copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\Release\libewf-x86.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\Release\libvmdk-x86.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\Release\libvhdi-x86.pdb" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.pdb" "$(OutDir)"</Command>
+    </PreBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf.experimental-a791283c87b6ffff417372a24\msvscpp\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release;$(ProjectDir)..\..\..\AFFLIBv3\win32\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win32.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlib-x86.lib;libewf-experimental-x86.lib;libvhdi-x86.lib;libvmdk-x86.lib;libaff4-x86.lib;libcrypto.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|Win32'">
     <ClCompile>
@@ -217,9 +303,9 @@ xcopy /E /Y "$(VCInstallDir)\redist\$(PlatformTarget)\Microsoft.VC140.CRT" "$(Ou
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\;$(TskNugetIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf.legacy-20140809\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -228,13 +314,52 @@ xcopy /E /Y "$(VCInstallDir)\redist\$(PlatformTarget)\Microsoft.VC140.CRT" "$(Ou
       <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
     </ClCompile>
     <PreBuildEvent>
-      <Command>copy "$(LibEwfLib)\libewf.dll" "$(OutDir)"
-copy "$(ZlibDll)\zlib.dll" "$(OutDir)"
-copy "$(LibVmdkLib)\libvmdk.dll" "$(OutDir)"
-copy "$(LibVhdiLib)\libvhdi.dll" "$(OutDir)"
-xcopy /E /Y "$(UniversalCRTSdkDir)\redist\ucrt\DLLS\$(PlatformTarget)" "$(OutDir)"
-xcopy /E /Y "$(VCInstallDir)\redist\$(PlatformTarget)\Microsoft.VC140.CRT" "$(OutDir)"</Command>
+      <Command>copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.dll" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\c64\Release\libaff4-x64.dll" "$(OutDir)"
+
+
+copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.pdb" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(OutDir)"</Command>
     </PreBuildEvent>
+    <Link>
+      <AdditionalDependencies>zlib-x64.lib;libewf-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf.experimental-a791283c87b6ffff417372a24\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
+    </ClCompile>
+    <PreBuildEvent>
+      <Command>copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.dll" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.dll" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\c64\Release\libaff4-x64.dll" "$(OutDir)"
+
+
+copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.pdb" "$(OutDir)"
+copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(OutDir)"</Command>
+    </PreBuildEvent>
+    <Link>
+      <AdditionalDependencies>zlib-x64.lib;libewf-experimental-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf.experimental-a791283c87b6ffff417372a24\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|x64'">
     <ClCompile>
@@ -297,8 +422,11 @@ xcopy /E /Y "$(VCInstallDir)\redist\$(PlatformTarget)\Microsoft.VC140.CRT" "$(Ou
     <ClCompile Include="..\..\tsk\fs\fatxxfs.c" />
     <ClCompile Include="..\..\tsk\fs\fatxxfs_dent.c" />
     <ClCompile Include="..\..\tsk\fs\fatxxfs_meta.c" />
+    <ClCompile Include="..\..\tsk\fs\xwfs2.c" />
+    <ClCompile Include="..\..\tsk\fs\xwfs2_dent.cpp" />
     <ClCompile Include="..\..\tsk\hashdb\hdb_base.c" />
     <ClCompile Include="..\..\tsk\hashdb\binsrch_index.cpp" />
+    <ClCompile Include="..\..\tsk\img\aff4.c" />
     <ClCompile Include="..\..\tsk\img\img_writer.cpp" />
     <ClCompile Include="..\..\tsk\img\unsupported_types.c" />
     <ClCompile Include="..\..\tsk\img\vhd.c" />
@@ -409,7 +537,9 @@ xcopy /E /Y "$(VCInstallDir)\redist\$(PlatformTarget)\Microsoft.VC140.CRT" "$(Ou
     <ClInclude Include="..\..\tsk\fs\tsk_apfs.hpp" />
     <ClInclude Include="..\..\tsk\fs\tsk_exfatfs.h" />
     <ClInclude Include="..\..\tsk\fs\tsk_fatxxfs.h" />
+    <ClInclude Include="..\..\tsk\fs\tsk_xwfs2.h" />
     <ClInclude Include="..\..\tsk\hashdb\tsk_hash_info.h" />
+    <ClInclude Include="..\..\tsk\img\aff4.h" />
     <ClInclude Include="..\..\tsk\img\img_writer.h" />
     <ClInclude Include="..\..\tsk\img\pool.hpp" />
     <ClInclude Include="..\..\tsk\img\unsupported_types.h" />
@@ -458,21 +588,6 @@ xcopy /E /Y "$(VCInstallDir)\redist\$(PlatformTarget)\Microsoft.VC140.CRT" "$(Ou
     <ClInclude Include="..\..\tsk\img\tsk_img.h" />
     <ClInclude Include="..\..\tsk\img\tsk_img_i.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\openssl-vc140-vc141-x86_64.1.1.5\build\native\openssl-vc140-vc141-x86_64.targets" Condition="Exists('..\packages\openssl-vc140-vc141-x86_64.1.1.5\build\native\openssl-vc140-vc141-x86_64.targets')" />
-    <Import Project="..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets" Condition="Exists('..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets')" />
-    <Import Project="..\packages\zlib_native.1.2.11\build\native\zlib_native.targets" Condition="Exists('..\packages\zlib_native.1.2.11\build\native\zlib_native.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild" Condition="!$(Configuration.EndsWith('_NoLibs'))">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\openssl-vc140-vc141-x86_64.1.1.5\build\native\openssl-vc140-vc141-x86_64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\openssl-vc140-vc141-x86_64.1.1.5\build\native\openssl-vc140-vc141-x86_64.targets'))" />
-    <Error Condition="!Exists('..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib_native.redist.1.2.11\build\native\zlib_native.redist.targets'))" />
-    <Error Condition="!Exists('..\packages\zlib_native.1.2.11\build\native\zlib_native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib_native.1.2.11\build\native\zlib_native.targets'))" />
-  </Target>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

@@ -14,5 +14,5 @@ installLib() {
 }
 
 installLib libvhdi 20201204
-installLib libvmdk 20210807
+installLib libvmdk 20200926
 
