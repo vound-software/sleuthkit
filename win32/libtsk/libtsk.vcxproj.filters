@@ -378,6 +378,15 @@
     <ClCompile Include="..\..\tsk\img\unsupported_types.c">
       <Filter>img</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tsk\fs\xwfs2.c">
+      <Filter>fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tsk\img\aff4.c">
+      <Filter>vs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tsk\fs\xwfs2_dent.cpp">
+      <Filter>fs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\tsk\vs\tsk_bsd.h">
@@ -564,8 +573,11 @@
     <ClInclude Include="..\..\tsk\img\unsupported_types.h">
       <Filter>img</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ClInclude Include="..\..\tsk\fs\tsk_xwfs2.h">
+      <Filter>fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tsk\img\aff4.h">
+      <Filter>img</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
