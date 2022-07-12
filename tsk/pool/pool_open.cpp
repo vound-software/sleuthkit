@@ -134,3 +134,21 @@ void tsk_pool_close(const TSK_POOL_INFO *pool) {
   // each pool container is supposed to free the struct
   pool->close(pool);
 }
+
+
+TSK_IMG_INFO * getPoolImageInfoSing(TSK_IMG_INFO* const img,
+    const TSK_OFF_T offset,
+    TSK_POOL_TYPE_ENUM type) {
+
+
+    std::vector<APFSPool::img_t> v{};
+    v.reserve(1);
+    v.emplace_back(img, offset);
+
+
+    auto apfs = new APFSPoolCompat(std::move(v), APFS_POOL_NX_BLOCK_LATEST);
+
+    TSK_POOL_INFO  pInfo = apfs->pool_info();
+
+   return apfs->getImageInfo(&pInfo, offset);
+}

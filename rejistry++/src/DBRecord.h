@@ -30,6 +30,7 @@
 
 #include <cstdint>
 #include <string>
+#include <memory>
 
 // Local includes
 #include "Record.h"

@@ -118,12 +118,13 @@ extern "C" {
     typedef TSK_WALK_RET_ENUM(*TSK_FS_BLOCK_WALK_CB) (const TSK_FS_BLOCK *
         a_block, void *a_ptr);
 
+    __declspec(dllexport) TSK_FS_BLOCK_FLAG_ENUM tsk_fs_block_get_flag_only(TSK_FS_INFO* a_fs, TSK_DADDR_T a_addr);
 
     // external block-level functions
     extern void tsk_fs_block_free(TSK_FS_BLOCK * a_fs_block);
     extern TSK_FS_BLOCK *tsk_fs_block_get(TSK_FS_INFO * fs,
         TSK_FS_BLOCK * fs_block, TSK_DADDR_T addr);
-    extern TSK_FS_BLOCK *tsk_fs_block_get_flag(TSK_FS_INFO * a_fs,
+    __declspec(dllexport) TSK_FS_BLOCK *tsk_fs_block_get_flag(TSK_FS_INFO * a_fs,
         TSK_FS_BLOCK * a_fs_block, TSK_DADDR_T a_addr,
         TSK_FS_BLOCK_FLAG_ENUM a_flags);
     extern uint8_t tsk_fs_block_walk(TSK_FS_INFO * a_fs,
@@ -662,17 +663,17 @@ extern "C" {
     } TSK_FS_DIR_WALK_FLAG_ENUM;
 
 
-    extern TSK_FS_DIR *tsk_fs_dir_open_meta(TSK_FS_INFO * a_fs,
+	__declspec(dllexport)  TSK_FS_DIR *tsk_fs_dir_open_meta(TSK_FS_INFO * a_fs,
         TSK_INUM_T a_addr);
-    extern TSK_FS_DIR *tsk_fs_dir_open(TSK_FS_INFO * a_fs,
+	__declspec(dllexport)  TSK_FS_DIR *tsk_fs_dir_open(TSK_FS_INFO * a_fs,
         const char *a_dir);
-    extern uint8_t tsk_fs_dir_walk(TSK_FS_INFO * a_fs, TSK_INUM_T a_inode,
+	__declspec(dllexport)  uint8_t tsk_fs_dir_walk(TSK_FS_INFO * a_fs, TSK_INUM_T a_inode,
         TSK_FS_DIR_WALK_FLAG_ENUM a_flags, TSK_FS_DIR_WALK_CB a_action,
         void *a_ptr);
-    extern size_t tsk_fs_dir_getsize(const TSK_FS_DIR *);
-    extern TSK_FS_FILE *tsk_fs_dir_get(const TSK_FS_DIR *, size_t);
-    extern const TSK_FS_NAME *tsk_fs_dir_get_name(const TSK_FS_DIR * a_fs_dir, size_t a_idx);
-    extern void tsk_fs_dir_close(TSK_FS_DIR *);
+	__declspec(dllexport)  size_t tsk_fs_dir_getsize(const TSK_FS_DIR *);
+	__declspec(dllexport)  TSK_FS_FILE *tsk_fs_dir_get(const TSK_FS_DIR *, size_t);
+	__declspec(dllexport)  const TSK_FS_NAME *tsk_fs_dir_get_name(const TSK_FS_DIR * a_fs_dir, size_t a_idx);
+	__declspec(dllexport)  void tsk_fs_dir_close(TSK_FS_DIR *);
 
     extern int8_t tsk_fs_path2inum(TSK_FS_INFO * a_fs, const char *a_path,
         TSK_INUM_T * a_result, TSK_FS_NAME * a_fs_name);
@@ -709,28 +710,28 @@ extern "C" {
         TSK_FS_FILE_READ_FLAG_NOID = 0x02,      ///< Ignore the Id argument given in the API (use only the type)
     } TSK_FS_FILE_READ_FLAG_ENUM;
 
-    extern void tsk_fs_file_close(TSK_FS_FILE * a_fs_file);
-    extern TSK_FS_FILE *tsk_fs_file_open(TSK_FS_INFO * a_fs,
+	__declspec(dllexport)  void tsk_fs_file_close(TSK_FS_FILE * a_fs_file);
+	__declspec(dllexport)  TSK_FS_FILE *tsk_fs_file_open(TSK_FS_INFO * a_fs,
         TSK_FS_FILE * a_fs_file, const char *a_path);
-    extern TSK_FS_FILE *tsk_fs_file_open_meta(TSK_FS_INFO * fs,
+	__declspec(dllexport)  TSK_FS_FILE *tsk_fs_file_open_meta(TSK_FS_INFO * fs,
         TSK_FS_FILE * fs_file, TSK_INUM_T addr);
-    extern ssize_t
+	__declspec(dllexport)  ssize_t
         tsk_fs_file_read(TSK_FS_FILE *, TSK_OFF_T, char *, size_t,
         TSK_FS_FILE_READ_FLAG_ENUM);
     extern ssize_t tsk_fs_file_read_type(TSK_FS_FILE *,
         TSK_FS_ATTR_TYPE_ENUM, uint16_t, TSK_OFF_T, char *, size_t,
         TSK_FS_FILE_READ_FLAG_ENUM);
-    extern const TSK_FS_ATTR *tsk_fs_file_attr_get(TSK_FS_FILE *
+	__declspec(dllexport)  const TSK_FS_ATTR *tsk_fs_file_attr_get(TSK_FS_FILE *
         a_fs_file);
-    extern int tsk_fs_file_attr_getsize(TSK_FS_FILE * a_fs_file);
-    extern const TSK_FS_ATTR *tsk_fs_file_attr_get_idx(TSK_FS_FILE *
+    __declspec(dllexport) int tsk_fs_file_attr_getsize(TSK_FS_FILE * a_fs_file);
+    __declspec(dllexport) const TSK_FS_ATTR *tsk_fs_file_attr_get_idx(TSK_FS_FILE *
         a_fs_file, int a_idx);
     extern const TSK_FS_ATTR *tsk_fs_file_attr_get_type(TSK_FS_FILE *
         a_fs_file, TSK_FS_ATTR_TYPE_ENUM, uint16_t, uint8_t);
     extern const TSK_FS_ATTR *tsk_fs_file_attr_get_id(TSK_FS_FILE *
         a_fs_file, uint16_t);
 
-    extern uint8_t tsk_fs_file_walk(TSK_FS_FILE * a_fs_file,
+	__declspec(dllexport)  uint8_t tsk_fs_file_walk(TSK_FS_FILE * a_fs_file,
         TSK_FS_FILE_WALK_FLAG_ENUM a_flags, TSK_FS_FILE_WALK_CB a_action,
         void *a_ptr);
     extern uint8_t tsk_fs_file_walk_type(TSK_FS_FILE * a_fs_file,
@@ -738,7 +739,7 @@ extern "C" {
         TSK_FS_FILE_WALK_FLAG_ENUM a_flags, TSK_FS_FILE_WALK_CB a_action,
         void *a_ptr);
 
-    extern ssize_t tsk_fs_attr_read(const TSK_FS_ATTR * a_fs_attr,
+    __declspec(dllexport) ssize_t tsk_fs_attr_read(const TSK_FS_ATTR * a_fs_attr,
         TSK_OFF_T a_offset, char *a_buf, size_t a_len,
         TSK_FS_FILE_READ_FLAG_ENUM a_flags);
 
@@ -821,6 +822,8 @@ extern "C" {
         TSK_FS_TYPE_HFS_LEGACY= 0x00008000,   ///< HFS file system
         TSK_FS_TYPE_APFS = 0x00010000, ///< APFS file system
         TSK_FS_TYPE_APFS_DETECT = 0x00010000, ///< APFS auto detection
+        TSK_FS_TYPE_XWFS2 = 0x00020000, ///< Xways XWFS2 file system
+        TSK_FS_TYPE_XWFS2_DETECT = 0x00020000, ///< Xways XWFS2 auto detection
         TSK_FS_TYPE_UNSUPP = 0xffffffff,        ///< Unsupported file system
     };
     /* NOTE: Update bindings/java/src/org/sleuthkit/datamodel/TskData.java
@@ -903,6 +906,16 @@ extern "C" {
     * is for an APFS "file system". */
 #define TSK_FS_TYPE_ISAPFS(ftype) \
     (((ftype) & TSK_FS_TYPE_APFS_DETECT)?1:0)
+
+
+    /**
+    * \ingroup fslib
+    * Macro that takes a file system type and returns 1 if the type
+    * is for an XWFS2 "file system". */
+#define TSK_FS_TYPE_ISXWFS2(ftype) \
+    (((ftype) & TSK_FS_TYPE_XWFS2_DETECT)?1:0)
+
+
 
 
     /**
@@ -1039,21 +1052,36 @@ extern "C" {
 
 
     /* File system level */
-    extern TSK_FS_INFO *tsk_fs_open_img(TSK_IMG_INFO *, TSK_OFF_T,
-        TSK_FS_TYPE_ENUM);
-    extern TSK_FS_INFO *tsk_fs_open_vol(const TSK_VS_PART_INFO *,
-        TSK_FS_TYPE_ENUM);
-    extern TSK_FS_INFO *tsk_fs_open_pool(const TSK_POOL_INFO *,
-        TSK_DADDR_T, TSK_FS_TYPE_ENUM);
-    extern TSK_FS_INFO *tsk_fs_open_img_decrypt(TSK_IMG_INFO *, TSK_OFF_T,
-        TSK_FS_TYPE_ENUM, const char * password);
-    extern TSK_FS_INFO *tsk_fs_open_vol_decrypt(const TSK_VS_PART_INFO *,
-        TSK_FS_TYPE_ENUM, const char * password);
-    extern TSK_FS_INFO *tsk_fs_open_pool_decrypt(const TSK_POOL_INFO *,
-        TSK_DADDR_T, TSK_FS_TYPE_ENUM, const char * password);
-    extern void tsk_fs_close(TSK_FS_INFO *);
+	__declspec(dllexport)  TSK_FS_INFO * tsk_fs_open_img(TSK_IMG_INFO *, TSK_OFF_T,
+		TSK_FS_TYPE_ENUM);
 
-    extern TSK_FS_TYPE_ENUM tsk_fs_type_toid_utf8(const char *);
+	__declspec(dllexport)  TSK_FS_INFO *tsk_fs_img_detect_encryption(TSK_IMG_INFO * a_img_info, TSK_OFF_T a_offset,
+		TSK_FS_TYPE_ENUM a_ftype);
+
+	int tsk_bl_fs_decrypt_with_password_wide(TSK_FS_INFO*, const wchar_t *, size_t);
+	int tsk_bl_fs_decrypt_with_recovery_wide(TSK_FS_INFO *, const wchar_t *, size_t);
+	__declspec(dllexport) int tsk_bl_fs_decrypt_with_startup_key_wide(TSK_FS_INFO *, const wchar_t *);
+    int tsk_bl_fs_decrypt_with_clear_key(TSK_FS_INFO* fs);
+
+	__declspec(dllexport) TSK_FS_INFO *tsk_fs_open_vol(const TSK_VS_PART_INFO *,
+        TSK_FS_TYPE_ENUM);
+    __declspec(dllexport) TSK_FS_INFO* tsk_fs_open_vol_decrypt(const TSK_VS_PART_INFO* a_part_info,
+        TSK_FS_TYPE_ENUM a_ftype, const char* a_pass);
+
+    __declspec(dllexport) TSK_FS_INFO *tsk_fs_open_pool(const TSK_POOL_INFO *,
+        TSK_DADDR_T, TSK_FS_TYPE_ENUM);
+    __declspec(dllexport) TSK_FS_INFO *tsk_fs_open_img_decrypt(TSK_IMG_INFO *, TSK_OFF_T,
+        TSK_FS_TYPE_ENUM, const char * password);
+    __declspec(dllexport) TSK_FS_INFO *tsk_fs_open_vol_decrypt(const TSK_VS_PART_INFO *,
+        TSK_FS_TYPE_ENUM, const char * password);
+    __declspec(dllexport) TSK_FS_INFO *tsk_fs_open_pool_decrypt(const TSK_POOL_INFO *,
+        TSK_DADDR_T, TSK_FS_TYPE_ENUM, const char * password);
+    __declspec(dllexport) void tsk_fs_close(TSK_FS_INFO *);
+
+    __declspec(dllexport) TSK_FS_INFO* tsk_vound_open_pool_decrypt_internal(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, TSK_FS_TYPE_ENUM fstype, char* password);
+    __declspec(dllexport) TSK_FS_INFO* tsk_vound_open_pool(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, TSK_FS_TYPE_ENUM fstype);
+
+	__declspec(dllexport)  TSK_FS_TYPE_ENUM tsk_fs_type_toid_utf8(const char *);
     extern TSK_FS_TYPE_ENUM tsk_fs_type_toid(const TSK_TCHAR *);
     extern void tsk_fs_type_print(FILE *);
     extern const char *tsk_fs_type_toname(TSK_FS_TYPE_ENUM);

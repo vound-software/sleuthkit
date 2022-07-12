@@ -26,12 +26,13 @@
  *
  */
 #include<algorithm>
-
+#include <memory>
 // Local includes
 #include "DBIndirectRecord.h"
 #include "REGFHeader.h"
 #include "Cell.h"
 #include "RejistryException.h"
+
 
 namespace Rejistry {
 

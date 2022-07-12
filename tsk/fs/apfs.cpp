@@ -538,7 +538,7 @@ bool APFSFileSystem::unlock(const std::string& password) noexcept {
 
     // If a 128 bit VEK is wrapped with a 256 bit KEK then only the first 128
     // bits of the KEK are used.
-    const auto vek = rfc3394_key_unwrap(kek.get(), std::min(kek_len, vek_len),
+    const auto vek = rfc3394_key_unwrap(kek.get(), (std::min)(kek_len, vek_len),
                                         _crypto.wrapped_vek, vek_len + 8);
     if (vek == nullptr) {
       if (tsk_verbose) {

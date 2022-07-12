@@ -20,6 +20,7 @@
 
 #include "../auto/guid.h"
 
+#undef max
 // Helper function to see if a bitfield flag is set
 template <typename T, typename U,
           typename = std::enable_if_t<std::numeric_limits<T>::is_integer &&

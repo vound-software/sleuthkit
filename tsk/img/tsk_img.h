@@ -69,6 +69,7 @@ extern "C" {
         TSK_IMG_TYPE_VHD_VHD = 0x0100,   ///< VHD version
         TSK_IMG_TYPE_EXTERNAL = 0x1000,  ///< external defined format which at least implements TSK_IMG_INFO, used by pytsk
         TSK_IMG_TYPE_POOL = 0x4000,      ///< Pool
+        TSK_IMG_TYPE_AFF4_AFF4 = 0x8000, ///< AFF4
 
         TSK_IMG_TYPE_UNSUPP = 0xffff   ///< Unsupported disk image type
     } TSK_IMG_TYPE_ENUM;
@@ -106,26 +107,28 @@ extern "C" {
     };
 
     // open and close functions
-    extern TSK_IMG_INFO *tsk_img_open_sing(const TSK_TCHAR * a_image,
+    __declspec(dllexport) TSK_IMG_INFO *tsk_img_open_sing(const TSK_TCHAR * a_image,
         TSK_IMG_TYPE_ENUM type, unsigned int a_ssize);
-    extern TSK_IMG_INFO *tsk_img_open(int,
+    __declspec(dllexport) TSK_IMG_INFO *tsk_img_open(int,
         const TSK_TCHAR * const images[], TSK_IMG_TYPE_ENUM,
         unsigned int a_ssize);
-    extern TSK_IMG_INFO *tsk_img_open_utf8_sing(const char *a_image,
+    __declspec(dllexport) TSK_IMG_INFO *tsk_img_open_utf8_sing(const char *a_image,
         TSK_IMG_TYPE_ENUM type, unsigned int a_ssize);
-    extern TSK_IMG_INFO *tsk_img_open_utf8(int num_img,
+    __declspec(dllexport) TSK_IMG_INFO *tsk_img_open_utf8(int num_img,
         const char *const images[], TSK_IMG_TYPE_ENUM type,
         unsigned int a_ssize);
-    extern TSK_IMG_INFO *tsk_img_open_external(void* ext_img_info,
+    __declspec(dllexport) TSK_IMG_INFO *tsk_img_open_external(void* ext_img_info,
         TSK_OFF_T size, unsigned int sector_size,
         ssize_t(*read) (TSK_IMG_INFO * img, TSK_OFF_T off, char *buf, size_t len),
         void (*close) (TSK_IMG_INFO *),
         void (*imgstat) (TSK_IMG_INFO *, FILE *));
-    extern void tsk_img_close(TSK_IMG_INFO *);
+    __declspec(dllexport) void tsk_img_close(TSK_IMG_INFO *);
 
     // read functions
-    extern ssize_t tsk_img_read(TSK_IMG_INFO * img, TSK_OFF_T off,
+    __declspec(dllexport) ssize_t tsk_img_read(TSK_IMG_INFO * img, TSK_OFF_T off,
         char *buf, size_t len);
+
+    __declspec(dllexport) TSK_IMG_INFO* tsk_img_create_info();
 
     // type conversion functions
     extern TSK_IMG_TYPE_ENUM tsk_img_type_toid_utf8(const char *);

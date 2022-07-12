@@ -17,6 +17,13 @@
 #include "tsk_fs_i.h"
 #include "tsk_fatfs.h"
 
+
+TSK_FS_BLOCK_FLAG_ENUM tsk_fs_block_get_flag_only(TSK_FS_INFO* a_fs, TSK_DADDR_T a_addr) {
+    return a_fs->block_getflags(a_fs, a_addr);
+}
+
+
+
 /** \internal
 * Allocate a FS_DIR structure to load names into.
 *
@@ -1458,3 +1465,5 @@ uint32_t tsk_fs_dir_hash(const char *str) {
 
     return hash;
 }
+
+

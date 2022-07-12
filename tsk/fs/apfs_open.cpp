@@ -11,6 +11,7 @@
 
 #include "apfs_compat.hpp"
 #include "../img/pool.hpp"
+#include "../pool/apfs_pool_compat.hpp"
 #include "tsk_fs_i.h"
 
 TSK_FS_INFO* apfs_open_auto_detect(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
@@ -54,3 +55,20 @@ TSK_FS_INFO* apfs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
     return nullptr;
   }
 }
+
+
+TSK_FS_INFO* tsk_vound_open_pool_decrypt_internal(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, TSK_FS_TYPE_ENUM fstype, char* password) {
+
+    TSK_POOL_VOLUME_INFO* pvol_info = pool_info->vol_list;
+    TSK_IMG_INFO* pimg_info = pool_info->get_img_info(pool_info, pvol_info->block);
+
+    return tsk_fs_open_img_decrypt(pimg_info, pvol_info->block, TSK_FS_TYPE_APFS, password);
+}
+
+
+TSK_FS_INFO* tsk_vound_open_pool(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, TSK_FS_TYPE_ENUM fstype) {
+
+    return tsk_vound_open_pool_decrypt_internal(img, pool_info, offset, fstype, "");
+}
+
+

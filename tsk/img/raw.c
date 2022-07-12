@@ -475,6 +475,66 @@ raw_close(TSK_IMG_INFO * img_info)
 }
 
 
+/*
+VOUND modification
+
+*/
+TSK_OFF_T checkDeviceFile(TSK_TCHAR* file) {
+    TSK_OFF_T size = -1;
+
+    int nameLen = strlen(file);
+
+
+    if (nameLen > 0 && (file[nameLen - 1] == L"\\")) {
+        file[nameLen - 1] == L"\0";
+    }
+
+
+    SetErrorMode(SEM_NOOPENFILEERRORBOX);
+
+    HANDLE hnd = CreateFile(
+        file,
+        GENERIC_READ,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL);
+
+    if (hnd == INVALID_HANDLE_VALUE) {
+        DWORD err = GetLastError();
+        return -1;
+    }
+
+    DISK_GEOMETRY driveInfo;
+    PARTITION_INFORMATION diskInfo;
+    DWORD dwResult;
+    BOOL bResult;
+
+    dwResult = 0;
+
+    bResult = DeviceIoControl(
+        hnd,
+        IOCTL_DISK_GET_DRIVE_GEOMETRY,
+        NULL,
+        0,
+        &driveInfo,
+        sizeof(driveInfo),
+        &dwResult,
+        NULL);
+
+    if (!bResult) {
+        return -1;
+    }
+
+    CloseHandle(hnd);
+
+    ULONGLONG last_sector = driveInfo.Cylinders.QuadPart * driveInfo.TracksPerCylinder * driveInfo.SectorsPerTrack;
+    ULONGLONG total_sectors = last_sector + 1;
+
+    return total_sectors * driveInfo.BytesPerSector;
+}
+
 /**
  * Get the size in bytes of the given file.
  *
@@ -508,11 +568,27 @@ get_size(const TSK_TCHAR * a_file, uint8_t a_is_winobj)
         }
     }
     else if ((sb.st_mode & S_IFMT) == S_IFDIR) {
-        tsk_error_reset();
-        tsk_error_set_errno(TSK_ERR_IMG_MAGIC);
-        tsk_error_set_errstr("raw_open: image \"%" PRIttocTSK
-            "\" - is a directory", a_file);
-        return -3;
+        if (a_is_winobj) {
+            // checking whether we talk to windows device 
+            if (a_is_winobj) {
+#ifdef TSK_WIN32
+                size = checkDeviceFile(a_file);
+                if (size > 0) {
+                    return size;
+                }
+#else       
+                return -3;
+
+#endif            
+            }
+        }
+        else {
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_MAGIC);
+            tsk_error_set_errstr("raw_open: image \"%" PRIttocTSK
+                "\" - is a directory", a_file);
+            return -3;
+        }
     }
 
 #ifdef TSK_WIN32
