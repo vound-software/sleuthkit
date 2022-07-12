@@ -75,7 +75,7 @@ extern "C" {
 
     /* The core function here is to retrieve the per-thread error structure. Other functions to follow
      * are for convenience of performing common operations. */
-    extern TSK_ERROR_INFO *tsk_error_get_info();
+    __declspec(dllexport) TSK_ERROR_INFO *tsk_error_get_info();
 
     extern uint32_t tsk_error_get_errno();
     extern void tsk_error_set_errno(uint32_t t_errno);
@@ -98,9 +98,9 @@ extern "C" {
         ...) TSK_ERROR_FORMAT_ATTRIBUTE(1, 2);
 
     /** Return a human-readable form of tsk_error_get_errno **/
-    extern const char *tsk_error_get();
+    __declspec(dllexport) const char *tsk_error_get();
 
-    extern void tsk_error_print(FILE *);
+    __declspec(dllexport) void tsk_error_print(FILE *);
     extern void tsk_error_reset();
 
 
@@ -170,11 +170,11 @@ extern "C" {
         size_t len;             ///< Number of entries in the stack
     } TSK_STACK;
 
-    extern uint8_t tsk_stack_push(TSK_STACK * stack, uint64_t key);
-    extern void tsk_stack_pop(TSK_STACK * stack);
-    extern uint8_t tsk_stack_find(TSK_STACK * stack, uint64_t key);
-    extern void tsk_stack_free(TSK_STACK * stack);
-    extern TSK_STACK *tsk_stack_create();
+    __declspec(dllexport)  uint8_t tsk_stack_push(TSK_STACK * stack, uint64_t key);
+	__declspec(dllexport)  void tsk_stack_pop(TSK_STACK * stack);
+	__declspec(dllexport)  uint8_t tsk_stack_find(TSK_STACK * stack, uint64_t key);
+	__declspec(dllexport)  void tsk_stack_free(TSK_STACK * stack);
+	__declspec(dllexport)   TSK_STACK *tsk_stack_create();
 
 
     // print internal UTF-8 strings to local platform Unicode format
@@ -275,7 +275,7 @@ extern "C" {
 
 
     extern void tsk_version_print(FILE *);
-    extern const char *tsk_version_get_str();
+    __declspec(dllexport) const char *tsk_version_get_str();
 
 
 /*********** RETURN VALUES ************/

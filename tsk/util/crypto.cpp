@@ -112,7 +112,7 @@ int aes_xts_decryptor::decrypt_buffer(void *buffer, size_t length,
   auto buf = static_cast<char *>(buffer);
 
   while (length > 0) {
-    const auto read = decrypt_block(buf, std::min(length, _block_size),
+    const auto read = decrypt_block(buf, (std::min)(length, _block_size),
                                     position / _block_size);
     total_len += read;
     position += read;

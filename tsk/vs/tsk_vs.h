@@ -126,23 +126,23 @@ extern "C" {
     extern void tsk_vs_type_print(FILE *);
 
     // open a volume system
-    extern TSK_VS_INFO *tsk_vs_open(TSK_IMG_INFO *, TSK_DADDR_T,
+    __declspec(dllexport) TSK_VS_INFO *tsk_vs_open(TSK_IMG_INFO *, TSK_DADDR_T,
         TSK_VS_TYPE_ENUM);
-    extern void tsk_vs_close(TSK_VS_INFO *);
+    __declspec(dllexport) void tsk_vs_close(TSK_VS_INFO *);
 
     // read data in the volume system
-    extern ssize_t tsk_vs_read_block(TSK_VS_INFO * a_vs,
+    __declspec(dllexport) ssize_t tsk_vs_read_block(TSK_VS_INFO * a_vs,
         TSK_DADDR_T a_addr, char *buf, size_t len);
 
     // open a partition
-    extern const TSK_VS_PART_INFO *tsk_vs_part_get(const TSK_VS_INFO *,
+    __declspec(dllexport) const TSK_VS_PART_INFO *tsk_vs_part_get(const TSK_VS_INFO *,
         TSK_PNUM_T idx);
-    extern uint8_t tsk_vs_part_walk(TSK_VS_INFO * vs, TSK_PNUM_T start,
+    __declspec(dllexport) uint8_t tsk_vs_part_walk(TSK_VS_INFO * vs, TSK_PNUM_T start,
         TSK_PNUM_T last, TSK_VS_PART_FLAG_ENUM flags,
         TSK_VS_PART_WALK_CB action, void *ptr);
 
     // read data in partitions
-    extern ssize_t tsk_vs_part_read(const TSK_VS_PART_INFO *
+    __declspec(dllexport) ssize_t tsk_vs_part_read(const TSK_VS_PART_INFO *
         a_vs_part, TSK_OFF_T a_off, char *buf, size_t len);
     extern ssize_t tsk_vs_part_read_block(const TSK_VS_PART_INFO *
         a_vs_part, TSK_DADDR_T a_addr, char *buf, size_t len);

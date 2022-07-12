@@ -73,14 +73,14 @@ typedef struct _TSK_POOL_INFO {
 
 } TSK_POOL_INFO;
 
-extern const TSK_POOL_INFO *tsk_pool_open_sing(const TSK_VS_PART_INFO *part,
+__declspec(dllexport) const TSK_POOL_INFO *tsk_pool_open_sing(const TSK_VS_PART_INFO *part,
                                                TSK_POOL_TYPE_ENUM type);
 
 extern const TSK_POOL_INFO *tsk_pool_open(int num_vols,
                                           const TSK_VS_PART_INFO *const parts[],
                                           TSK_POOL_TYPE_ENUM type);
 
-extern const TSK_POOL_INFO *tsk_pool_open_img_sing(TSK_IMG_INFO *img,
+__declspec(dllexport) const TSK_POOL_INFO *tsk_pool_open_img_sing(TSK_IMG_INFO *img,
                                                    TSK_OFF_T offset,
                                                    TSK_POOL_TYPE_ENUM type);
 
@@ -89,7 +89,7 @@ extern const TSK_POOL_INFO *tsk_pool_open_img(int num_imgs,
                                               const TSK_OFF_T offsets[],
                                               TSK_POOL_TYPE_ENUM type);
 
-extern void tsk_pool_close(const TSK_POOL_INFO *);
+__declspec(dllexport) void tsk_pool_close(const TSK_POOL_INFO *);
 
 extern ssize_t tsk_pool_read(TSK_POOL_INFO *a_fs, TSK_OFF_T a_off, char *a_buf,
                              size_t a_len);
@@ -101,6 +101,9 @@ extern TSK_POOL_TYPE_ENUM tsk_pool_type_toid(const TSK_TCHAR *str);
 extern TSK_POOL_TYPE_ENUM tsk_pool_type_toid_utf8(const char *str);
 extern void tsk_pool_type_print(FILE *hFile);
 extern const char *tsk_pool_type_toname(TSK_POOL_TYPE_ENUM ptype);
+
+
+__declspec(dllexport) TSK_IMG_INFO* getPoolImageInfoSing(TSK_IMG_INFO* const img, const TSK_OFF_T offset, TSK_POOL_TYPE_ENUM type);
 
 #ifdef __cplusplus
 }  // extern "C"

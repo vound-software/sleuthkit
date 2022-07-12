@@ -131,7 +131,7 @@ tsk_fs_open_img_decrypt(TSK_IMG_INFO * a_img_info, TSK_OFF_T a_offset,
     const struct {
         char* name;
         TSK_FS_INFO* (*open)(TSK_IMG_INFO*, TSK_OFF_T,
-                                 TSK_FS_TYPE_ENUM, uint8_t);
+                                 TSK_FS_TYPE_ENUM, const char *);
         // This type should be the _DETECT version because it used
         // during autodetection
         TSK_FS_TYPE_ENUM type;
@@ -145,7 +145,8 @@ tsk_fs_open_img_decrypt(TSK_IMG_INFO * a_img_info, TSK_OFF_T a_offset,
         { "HFS",      hfs_open,     TSK_FS_TYPE_HFS_DETECT     },
 #endif
         { "ISO9660",  iso9660_open, TSK_FS_TYPE_ISO9660_DETECT },
-        { "APFS",     apfs_open_auto_detect,    TSK_FS_TYPE_APFS_DETECT }
+        { "APFS",     apfs_open_auto_detect,    TSK_FS_TYPE_APFS_DETECT },
+        { "XWFS2",    xwfs2_open,   TSK_FS_TYPE_XWFS2_DETECT  }
     };
     if (a_img_info == NULL) {
         tsk_error_reset();
@@ -184,7 +185,7 @@ tsk_fs_open_img_decrypt(TSK_IMG_INFO * a_img_info, TSK_OFF_T a_offset,
 
         for (i = 0; i < sizeof(FS_OPENERS)/sizeof(FS_OPENERS[0]); ++i) {
             if ((fs_info = FS_OPENERS[i].open(
-                    a_img_info, a_offset, FS_OPENERS[i].type, 1)) != NULL) {
+                    a_img_info, a_offset, FS_OPENERS[i].type, a_pass)) != NULL) {
                 // fs opens as type i
                 if (fs_first == NULL) {
                     // first success opening fs
@@ -280,6 +281,9 @@ tsk_fs_open_img_decrypt(TSK_IMG_INFO * a_img_info, TSK_OFF_T a_offset,
     } 
     else if (TSK_FS_TYPE_ISAPFS(a_ftype)) {
         return apfs_open(a_img_info, a_offset, a_ftype, a_pass);
+    }
+    else if (TSK_FS_TYPE_ISXWFS2(a_ftype)) {
+        return xwfs2_open(a_img_info, a_offset, a_ftype,0);
     }
     tsk_error_reset();
     tsk_error_set_errno(TSK_ERR_FS_UNSUPTYPE);

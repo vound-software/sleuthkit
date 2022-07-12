@@ -464,7 +464,249 @@ raw_close(TSK_IMG_INFO * img_info)
 }
 
 
+/*
+VOUND modification
 
+*/
+TSK_OFF_T checkDeviceFile(TSK_TCHAR* file) {
+    TSK_OFF_T size = -1;
+
+    int nameLen = strlen(file);
+
+
+    if (nameLen > 0 && (file[nameLen - 1] == L"\\")) {
+        file[nameLen - 1] == L"\0";
+    }
+
+
+    SetErrorMode(SEM_NOOPENFILEERRORBOX);
+
+    HANDLE hnd = CreateFile(
+        file,
+        GENERIC_READ,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL);
+
+    if (hnd == INVALID_HANDLE_VALUE) {
+        DWORD err = GetLastError();
+        return -1;
+    }
+
+    DISK_GEOMETRY driveInfo;
+    PARTITION_INFORMATION diskInfo;
+    DWORD dwResult;
+    BOOL bResult;
+
+    dwResult = 0;
+
+    bResult = DeviceIoControl(
+        hnd,
+        IOCTL_DISK_GET_DRIVE_GEOMETRY,
+        NULL,
+        0,
+        &driveInfo,
+        sizeof(driveInfo),
+        &dwResult,
+        NULL);
+
+    if (!bResult) {
+        return -1;
+    }
+
+    CloseHandle(hnd);
+
+    ULONGLONG last_sector = driveInfo.Cylinders.QuadPart * driveInfo.TracksPerCylinder * driveInfo.SectorsPerTrack;
+    ULONGLONG total_sectors = last_sector + 1;
+
+    return total_sectors * driveInfo.BytesPerSector;
+}
+
+/**
+ * Get the size in bytes of the given file.
+ *
+ * @param a_file The file to test
+ * @param is_winobj 1 if the file is a windows object and not a real file
+ *
+ * @return the size in bytes, or -1 on error/unknown,
+ *         -2 if unreadable, -3 if it's a directory.
+ */
+static TSK_OFF_T
+get_size(const TSK_TCHAR * a_file, uint8_t a_is_winobj)
+{
+    TSK_OFF_T size = -1;
+    struct STAT_STR sb;
+
+    if (TSTAT(a_file, &sb) < 0) {
+        if (a_is_winobj) {
+            /* stat can fail for Windows objects; ignore that */
+            if (tsk_verbose) {
+                tsk_fprintf(stderr,
+                    "raw_open: ignoring stat result on Windows device %"
+                    PRIttocTSK "\n", a_file);
+            }
+        }
+        else {
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_STAT);
+            tsk_error_set_errstr("raw_open: image \"%" PRIttocTSK
+                "\" - %s", a_file, strerror(errno));
+            return -2;
+        }
+    }
+    else if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+        if (a_is_winobj) {
+            // checking whether we talk to windows device 
+            if (a_is_winobj) {
+#ifdef TSK_WIN32
+                size = checkDeviceFile(a_file);
+                if (size > 0) {
+                    return size;
+                }
+#else       
+                return -3;
+
+#endif            
+            }
+        }
+        else {
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_MAGIC);
+            tsk_error_set_errstr("raw_open: image \"%" PRIttocTSK
+                "\" - is a directory", a_file);
+            return -3;
+        }
+    }
+
+#ifdef TSK_WIN32
+    {
+        HANDLE fd;
+        DWORD dwHi, dwLo;
+
+        if ((fd = CreateFile(a_file, FILE_READ_DATA,
+                    FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, 
+                    OPEN_EXISTING, 0, NULL)) ==
+            INVALID_HANDLE_VALUE) {
+            int lastError = (int)GetLastError();
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+            // print string of commonly found errors
+            if (lastError == ERROR_ACCESS_DENIED) {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - access denied", a_file);
+            }
+            else if (lastError == ERROR_SHARING_VIOLATION) {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - sharing violation", a_file);
+            }
+            else if (lastError == ERROR_FILE_NOT_FOUND) {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - file not found", a_file);
+            }
+            else {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - (error %d)", a_file, lastError);
+            }
+            return -2;
+        }
+
+        /* We need different techniques to determine the size of Windows physical
+         * devices versus normal files */
+        if (a_is_winobj == 0) {
+            dwLo = GetFileSize(fd, &dwHi);
+            if (dwLo == 0xffffffff) {
+                int lastError = (int)GetLastError();
+                tsk_error_reset();
+                tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - GetFileSize: %d", a_file, lastError);
+                size = -1;
+            }
+            else {
+                size = dwLo | ((TSK_OFF_T) dwHi << 32);
+            }
+        }
+        else {
+            
+            //use GET_PARTITION_INFO_EX prior to IOCTL_DISK_GET_DRIVE_GEOMETRY
+            // to determine the physical disk size because
+            //calculating it with the help of GET_DRIVE_GEOMETRY gives only
+            // approximate number
+            DWORD junk;
+            
+            PARTITION_INFORMATION_EX partition;
+            if (FALSE == DeviceIoControl(fd,
+                IOCTL_DISK_GET_PARTITION_INFO_EX,
+                NULL, 0, &partition, sizeof(partition), &junk,
+                (LPOVERLAPPED)NULL) )  {
+                DISK_GEOMETRY pdg;
+
+                if (FALSE == DeviceIoControl(fd, IOCTL_DISK_GET_DRIVE_GEOMETRY,
+                        NULL, 0, &pdg, sizeof(pdg), &junk, (LPOVERLAPPED) NULL)) {
+                    int lastError = (int)GetLastError();
+                    tsk_error_reset();
+                    tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+                    tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                        "\" - DeviceIoControl: %d", a_file,
+                        lastError);
+                    size = -1;
+                }
+                else {
+                    size = pdg.Cylinders.QuadPart *
+                        (TSK_OFF_T) pdg.TracksPerCylinder *
+                        (TSK_OFF_T) pdg.SectorsPerTrack *
+                        (TSK_OFF_T) pdg.BytesPerSector;
+                }
+            }
+            else {
+                size = partition.PartitionLength.QuadPart;
+            }
+        }
+
+        CloseHandle(fd);
+    }
+#else
+
+    int fd;
+
+    if ((fd = open(a_file, O_RDONLY | O_BINARY)) < 0) {
+        tsk_error_reset();
+        tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+        tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK "\" - %s",
+            a_file, strerror(errno));
+        return -2;
+    }
+
+#ifdef __APPLE__
+    /* OS X doesn't support SEEK_END on char devices */
+    if ((sb.st_mode & S_IFMT) != S_IFCHR) {
+        size = lseek(fd, 0, SEEK_END);
+    }
+
+    if (size <= 0) {
+        int blkSize;
+        long long blkCnt;
+
+        if (ioctl(fd, DKIOCGETBLOCKSIZE, &blkSize) >= 0) {
+            if (ioctl(fd, DKIOCGETBLOCKCOUNT, &blkCnt) >= 0) {
+                size = blkCnt * (long long) blkSize;
+            }
+        }
+    }
+#else
+    /* We don't use the stat output because it doesn't work on raw
+     * devices and such */
+    size = lseek(fd, 0, SEEK_END);
+#endif
+
+    close(fd);
+
+#endif
+
+    return size;
+}
 
 #ifdef TSK_WIN32
 /**
