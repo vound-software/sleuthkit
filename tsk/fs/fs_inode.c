@@ -87,6 +87,54 @@ tsk_fs_meta_realloc(TSK_FS_META * a_fs_meta, size_t a_buf_len)
     return a_fs_meta;
 }
 
+/**
+ * \internal
+ * Free the memory allocated to the TSK_FS_META structure.
+ *
+ * @param fs_meta Structure to free
+ */
+void
+tsk_fs_meta_close_vound_allocator(TSK_FS_META* fs_meta)
+{
+    TSK_FS_META_NAME_LIST* fs_name, * fs_name2;
+
+    if ((!fs_meta) || (fs_meta->tag != TSK_FS_META_TAG))
+        return;
+
+    // clear the tag so we know the structure isn't alloc
+    fs_meta->tag = 0;
+
+    if (fs_meta->content_ptr) {
+        if (fs_meta->reset_content) {
+            fs_meta->reset_content(fs_meta->content_ptr);
+        }
+
+        free((char*)fs_meta->content_ptr);
+    }
+
+    fs_meta->content_ptr = NULL;
+    fs_meta->content_len = 0;
+
+    if (fs_meta->attr)
+        tsk_fs_attr_run_wipe();
+
+    fs_meta->attr = NULL;
+
+    free(fs_meta->link);
+    fs_meta->link = NULL;
+
+    fs_name = fs_meta->name2;
+    while (fs_name) {
+        fs_name2 = fs_name->next;
+        fs_name->next = NULL;
+        free(fs_name);
+        fs_name = fs_name2;
+    }
+
+    free(fs_meta);
+}
+
+
 
 /**
  * \internal
