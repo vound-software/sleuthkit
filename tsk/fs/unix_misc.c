@@ -31,7 +31,7 @@
  *
  * @returns the number of bytes processed and -1 if an error occurred
  */
-static TSK_OFF_T
+inline static TSK_OFF_T
 unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
     TSK_DADDR_T * addrs, size_t addr_len, TSK_OFF_T length)
 {
@@ -215,23 +215,25 @@ unix_make_data_run_indirect(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
         retval =
             unix_make_data_run_direct(fs, fs_attr, myaddrs, addr_cnt,
             length_remain);
+        
         if (retval != -1) {
-            length_remain -= retval;
+               length_remain -= retval;
         }
+
     }
     else {
         size_t i;
         retval = 0;
-        for (i = 0; i < addr_cnt && retval != -1; i++) {
-            retval =
-                unix_make_data_run_indirect(fs, fs_attr, fs_attr_indir,
-                buf, level - 1, myaddrs[i], length_remain);
-            if (retval == -1) {
-                break;
-            }
-            else {
-                length_remain -= retval;
-            }
+        for (i = 0; i < addr_cnt && retval != -1 && length_remain > 0; i++) {
+                retval =
+                    unix_make_data_run_indirect(fs, fs_attr, fs_attr_indir,
+                        buf, level - 1, myaddrs[i], length_remain);
+                if (retval == -1) {
+                    break;
+                }
+                else {
+                    length_remain -= retval;
+                }
         }
     }
 
@@ -254,6 +256,12 @@ tsk_fs_unix_make_data_run(TSK_FS_FILE * fs_file)
     TSK_FS_ATTR *fs_attr;
     TSK_FS_META *fs_meta = fs_file->meta;
     TSK_FS_INFO *fs = fs_file->fs_info;
+
+
+    size_t fs_bufsize0;
+    size_t fs_bufsize1;
+    size_t ptrsperblock;
+    int numBlocks = 0;
 
     // clean up any error messages that are lying around
     tsk_error_reset();
@@ -305,6 +313,35 @@ tsk_fs_unix_make_data_run(TSK_FS_FILE * fs_file)
         return 1;
     }
 
+    /* With FFS/UFS a full block contains the addresses, but block_size is
+    * only a fragment.  Figure out the scratch buffer size and the buffers to
+    * store the cleaned addresses (endian converted) */
+    if (TSK_FS_TYPE_ISFFS(fs->ftype)) {
+        FFS_INFO* ffs = (FFS_INFO*)fs;
+
+        fs_bufsize0 = ffs->ffsbsize_b;
+        if ((fs->ftype == TSK_FS_TYPE_FFS1)
+            || (fs->ftype == TSK_FS_TYPE_FFS1B)) {
+            ptrsperblock = fs_bufsize0 / 4;
+        }
+        else {
+            ptrsperblock = fs_bufsize0 / 8;
+        }
+    }
+    else {
+        fs_bufsize0 = fs->block_size;
+        ptrsperblock = fs_bufsize0 / 4;
+    }
+    fs_bufsize1 = sizeof(TSK_DADDR_T) * ptrsperblock;
+
+    numBlocks = 12*ptrsperblock +   
+        (int)(((fs_meta->size + fs_bufsize0 - 1) / fs_bufsize0) - 12);
+
+    
+    if (tsk_fs_attr_initialize_unix(numBlocks) == 1) {
+        return 1;
+    }
+
     read_b =
         unix_make_data_run_direct(fs, fs_attr,
         (TSK_DADDR_T *) fs_meta->content_ptr, 12, length);
@@ -320,36 +357,10 @@ tsk_fs_unix_make_data_run(TSK_FS_FILE * fs_file)
     if (length > 0) {
         int level;
         char *buf[4] = {NULL};
-        size_t fs_bufsize0;
-        size_t fs_bufsize1;
-        size_t ptrsperblock;
-        int numBlocks = 0;
         int numSingIndirect = 0;
         int numDblIndirect = 0;
         int numTripIndirect = 0;
         TSK_FS_ATTR *fs_attr_indir;
-
-
-        /* With FFS/UFS a full block contains the addresses, but block_size is
-         * only a fragment.  Figure out the scratch buffer size and the buffers to 
-         * store the cleaned addresses (endian converted) */
-        if (TSK_FS_TYPE_ISFFS(fs->ftype)) {
-            FFS_INFO *ffs = (FFS_INFO *) fs;
-
-            fs_bufsize0 = ffs->ffsbsize_b;
-            if ((fs->ftype == TSK_FS_TYPE_FFS1)
-                || (fs->ftype == TSK_FS_TYPE_FFS1B)) {
-                ptrsperblock = fs_bufsize0 / 4;
-            }
-            else {
-                ptrsperblock = fs_bufsize0 / 8;
-            }
-        }
-        else {
-            fs_bufsize0 = fs->block_size;
-            ptrsperblock = fs_bufsize0 / 4;
-        }
-        fs_bufsize1 = sizeof(TSK_DADDR_T) * ptrsperblock;
 
         /*
          * Initialize a buffer for the 3 levels of indirection that are supported by
@@ -366,8 +377,6 @@ tsk_fs_unix_make_data_run(TSK_FS_FILE * fs_file)
         }
 
         // determine number of indirect lbocks needed for file size...
-        numBlocks =
-            (int) (((fs_meta->size + fs_bufsize0 - 1) / fs_bufsize0) - 12);
         numSingIndirect =
             (int) ((numBlocks + ptrsperblock - 1) / ptrsperblock);
         numDblIndirect = 0;

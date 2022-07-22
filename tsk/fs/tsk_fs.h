@@ -172,6 +172,7 @@ extern "C" {
     };
 
     extern void tsk_fs_attr_run_free(TSK_FS_ATTR_RUN *);
+    extern void tsk_fs_attr_run_wipe();
 
     /**
     * Flags used for the TSK_FS_ATTR structure, which is used to
