@@ -221,7 +221,7 @@ copy "$(LibVhdiLib)\libvhdi.dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf.legacy-20140809\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\aff4-cpp-lite\src;$(ProjectDir)..\..\..\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBBDE;HAVE_LIBEWF;HAVE_LIBZ;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBAFF4;HAVE_LIBOPENSSL;WIN32;NDEBUG;_LIB;WINVER=0x0501;HAVE_LIBEWF_V2_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -232,7 +232,8 @@ copy "$(LibVhdiLib)\libvhdi.dll" "$(OutDir)"</Command>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
-      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <PreBuildEvent>
       <Command>copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\Release\libewf-x86.dll" "$(OutDir)"
@@ -303,7 +304,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.pdb" "
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf.legacy-20140809\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -312,29 +313,32 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.pdb" "
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <PreBuildEvent>
-      <Command>copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.dll" "$(OutDir)"
+      <Command>copy "$(ProjectDir)..\..\..\libewf\msvscpp\x64\Release\libewf-x64.dll" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.dll" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.dll" "$(OutDir)"
 copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\c64\Release\libaff4-x64.dll" "$(OutDir)"
 
 
-copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libewf\msvscpp\x64\Release\libewf-x64.pdb" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.pdb" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.pdb" "$(OutDir)"
 copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(OutDir)"</Command>
     </PreBuildEvent>
     <Link>
       <AdditionalDependencies>zlib-x64.lib;libewf-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'">
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf.experimental-a791283c87b6ffff417372a24\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf-exp\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -343,22 +347,25 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <PreBuildEvent>
-      <Command>copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.dll" "$(OutDir)"
+      <Command>copy "$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release\libewf-exp-x64.dll" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.dll" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.dll" "$(OutDir)"
 copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\c64\Release\libaff4-x64.dll" "$(OutDir)"
 
 
-copy "$(ProjectDir)..\..\..\libewf.legacy-20140809\msvscpp\x64\Release\libewf-x64.pdb" "$(OutDir)"
+copy "$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release\libewf-exp-x64.pdb" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.pdb" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.pdb" "$(OutDir)"
 copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(OutDir)"</Command>
     </PreBuildEvent>
     <Link>
-      <AdditionalDependencies>zlib-x64.lib;libewf-experimental-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf.experimental-a791283c87b6ffff417372a24\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlib-x64.lib;libewf-exp-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|x64'">
@@ -587,6 +594,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(
     <ClInclude Include="..\..\tsk\img\raw.h" />
     <ClInclude Include="..\..\tsk\img\tsk_img.h" />
     <ClInclude Include="..\..\tsk\img\tsk_img_i.h" />
+    <ClInclude Include="Header.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

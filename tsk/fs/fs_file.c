@@ -50,6 +50,18 @@ tsk_fs_file_reset(TSK_FS_FILE * a_fs_file)
         tsk_fs_name_reset(a_fs_file->name);
 }
 
+char is_ext_fs(TSK_FS_FILE* fs_file) {
+
+    if (fs_file->fs_info) {
+        TSK_FS_TYPE_ENUM type = fs_file->fs_info->ftype;
+
+        if (type == TSK_FS_TYPE_EXT2 || type == TSK_FS_TYPE_EXT3 || type == TSK_FS_TYPE_EXT4) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 
 /**
  * \ingroup fslib
@@ -65,7 +77,12 @@ tsk_fs_file_close(TSK_FS_FILE * a_fs_file)
     a_fs_file->tag = 0;
 
     if (a_fs_file->meta) {
-        tsk_fs_meta_close(a_fs_file->meta);
+        if (is_ext_fs(a_fs_file)) {
+            tsk_fs_meta_close_vound_allocator(a_fs_file->meta);
+        }
+        else {
+            tsk_fs_meta_close(a_fs_file->meta);
+        }
         a_fs_file->meta = NULL;
     }
     if (a_fs_file->name) {
@@ -75,7 +92,6 @@ tsk_fs_file_close(TSK_FS_FILE * a_fs_file)
 
     free(a_fs_file);
 }
-
 
 
 /** 

@@ -561,5 +561,8 @@
     <ClInclude Include="..\..\tsk\img\aff4.h">
       <Filter>img</Filter>
     </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>fs</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
