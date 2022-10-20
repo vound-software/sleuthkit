@@ -352,7 +352,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <PreBuildEvent>
-      <Command>copy "$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release\libewf-exp-x64.dll" "$(OutDir)"
+      <Command>copy "$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release\libewf-experimental-x64.dll" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.dll" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.dll" "$(OutDir)"
 copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\c64\Release\libaff4-x64.dll" "$(OutDir)"
@@ -364,7 +364,7 @@ copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.pdb" "$(OutD
 copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(OutDir)"</Command>
     </PreBuildEvent>
     <Link>
-      <AdditionalDependencies>zlib-x64.lib;libewf-exp-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zlib-x64.lib;libewf-experimental-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -601,6 +601,10 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(
     <ClInclude Include="..\..\tsk\img\tsk_img.h" />
     <ClInclude Include="..\..\tsk\img\tsk_img_i.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="libtsk.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

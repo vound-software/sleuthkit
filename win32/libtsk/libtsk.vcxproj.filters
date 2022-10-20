@@ -582,5 +582,9 @@
     <ClInclude Include="Header.h">
       <Filter>fs</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="libtsk.rc" />
   </ItemGroup>
 </Project>
