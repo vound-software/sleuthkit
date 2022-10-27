@@ -1087,8 +1087,8 @@ extern "C" {
         TSK_DADDR_T, TSK_FS_TYPE_ENUM, const char * password);
     __declspec(dllexport) void tsk_fs_close(TSK_FS_INFO *);
 
-    __declspec(dllexport) TSK_FS_INFO* tsk_vound_open_pool_decrypt_internal(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, TSK_FS_TYPE_ENUM fstype, char* password);
-    __declspec(dllexport) TSK_FS_INFO* tsk_vound_open_pool(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, TSK_FS_TYPE_ENUM fstype);
+    __declspec(dllexport) TSK_FS_INFO* tsk_vound_open_pool_decrypt_internal(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, int fsNum, TSK_FS_TYPE_ENUM fstype, char* password);
+    __declspec(dllexport) TSK_FS_INFO* tsk_vound_open_pool(TSK_IMG_INFO* img, TSK_POOL_INFO* pool_info, long offset, int fsNum, TSK_FS_TYPE_ENUM fstype);
 
 	__declspec(dllexport)  TSK_FS_TYPE_ENUM tsk_fs_type_toid_utf8(const char *);
     extern TSK_FS_TYPE_ENUM tsk_fs_type_toid(const TSK_TCHAR *);
