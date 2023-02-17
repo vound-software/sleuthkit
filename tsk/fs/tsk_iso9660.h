@@ -391,6 +391,7 @@ typedef struct {
     uint8_t rr_found;           /* 1 if rockridge found */
 } ISO_INFO;
 
+
 extern TSK_RETVAL_ENUM iso9660_dir_open_meta(TSK_FS_INFO * a_fs,
     TSK_FS_DIR ** a_fs_dir, TSK_INUM_T a_addr, int recursion_depth);
 

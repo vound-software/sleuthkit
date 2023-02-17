@@ -676,6 +676,8 @@ extern "C" {
 	__declspec(dllexport)  const TSK_FS_NAME *tsk_fs_dir_get_name(const TSK_FS_DIR * a_fs_dir, size_t a_idx);
 	__declspec(dllexport)  void tsk_fs_dir_close(TSK_FS_DIR *);
 
+    __declspec(dllexport) size_t tsk_fs_fs_id_read(TSK_FS_INFO fs_info, char * buffer, size_t len);
+
     extern int8_t tsk_fs_path2inum(TSK_FS_INFO * a_fs, const char *a_path,
         TSK_INUM_T * a_result, TSK_FS_NAME * a_fs_name);
 
