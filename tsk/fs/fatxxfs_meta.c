@@ -274,7 +274,7 @@ fatxxfs_is_dentry(FATFS_INFO *a_fatfs, FATFS_DENTRY *a_dentry, FATFS_DATA_UNIT_A
             return 0;
         }
 		
-		else if((a_fatfs->subtype == TSK_FATFS_SUBTYPE_SPEC) && (is_83_name(dentry) == 0))
+		else if((a_fatfs->subtype == TSK_FATFS_SUBTYPE_SPEC) && 1 /*(is_83_name(dentry) == 0) */) // Bogdan -- commented name 8.3 chcking , cause it fails on japenese charset
 			return 0;
 
         // basic sanity check on values

@@ -68,13 +68,13 @@ BEGIN
         BLOCK "200004b0"
         BEGIN
             VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
-            VALUE "FileVersion", "4.11.0"
+            VALUE "FileDescription", "Libtsk+VOUND patches"
+            VALUE "FileVersion", "4.12.1"
             VALUE "InternalName", "libtsk.dll"
-            VALUE "LegalCopyright", "Copyright (C) 2022"
+            VALUE "LegalCopyright", "Copyright (C) 2023"
             VALUE "OriginalFilename", "libtsk.dll"
             VALUE "ProductName", "libtsk"
-            VALUE "ProductVersion", "4.11.0"
+            VALUE "ProductVersion", "4.12.1"
         END
     END
     BLOCK "VarFileInfo"
