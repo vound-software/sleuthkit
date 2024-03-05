@@ -5179,7 +5179,10 @@ static int
 process_kape_boot_format(NTFS_INFO* ntfs_info) {
 
     // Check that we have a VHD
-    if (ntfs_info->fs_info.img_info->itype != TSK_IMG_TYPE_VHD_VHD) {
+    // for intella vhd is pprocessed as external image
+    if (
+        (ntfs_info->fs_info.img_info->itype != TSK_IMG_TYPE_VHD_VHD) &&
+        (ntfs_info->fs_info.img_info->itype != TSK_IMG_TYPE_EXTERNAL)) {
         return 1;
     }
 
