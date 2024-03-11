@@ -258,12 +258,29 @@ hfs_dir_open_meta_cb(HFS_INFO * hfs, int8_t level_type,
 
         /* This will link the folder to its parent, which is the ".." entry */
         else if (rec_type == HFS_FOLDER_THREAD) {
-            if ((nodesize < sizeof(hfs_thread)) || (rec_off2 > nodesize - sizeof(hfs_thread))) {
+            
+
+            // hfs_thread is variable size structure. The name string is defined in pacal mode -- meaning 
+            // it contains 2 byte len field as first member. So minimal lenght of the structure  
+            // shold be length of header , which is 0x50.
+
+
+            hfs_thread* thread = (hfs_thread*)&rec_buf[rec_off2];
+            const int32_t thread_size = 0x50 + tsk_getu16(hfs->fs_info.endian, thread->name.length);
+
+
+           if (nodesize < thread_size) {
+                tsk_error_set_errno(TSK_ERR_FS_GENFS);
+                tsk_error_set_errstr("hfs_dir_open_meta: nodesize value below the limit");
+                return HFS_BTREE_CB_ERR;
+            }
+
+            if ( (rec_off2 > nodesize - thread_size)) {
                 tsk_error_set_errno(TSK_ERR_FS_GENFS);
                 tsk_error_set_errstr("hfs_dir_open_meta: nodesize value out of bounds");
                 return HFS_BTREE_CB_ERR;
             }
-            hfs_thread *thread = (hfs_thread *) & rec_buf[rec_off2];
+
             strcpy(info->fs_name->name, "..");
             info->fs_name->meta_addr =
                 tsk_getu32(hfs->fs_info.endian, thread->parent_cnid);
