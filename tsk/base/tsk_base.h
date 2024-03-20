@@ -98,7 +98,8 @@ extern "C" {
         ...) TSK_ERROR_FORMAT_ATTRIBUTE(1, 2);
 
     /** Return a human-readable form of tsk_error_get_errno **/
-    __declspec(dllexport) const char *tsk_error_get();
+    extern const char *tsk_error_get();
+    __declspec(dllexport) const char* tsk_error_get_vound();
 
     __declspec(dllexport) void tsk_error_print(FILE *);
     extern void tsk_error_reset();

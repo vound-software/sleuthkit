@@ -176,6 +176,88 @@ tsk_error_get_info()
 
 #endif
 
+
+/**
+ * \ingroup baselib
+ * Return the Structured current error message
+ *
+ * @returns String with error message or NULL if there is no error
+ */
+const char*
+tsk_error_get_vound()
+{
+    size_t pidx = 0;
+    TSK_ERROR_INFO* error_info = tsk_error_get_info();
+    int t_errno = error_info->t_errno;
+    char* errstr_print = error_info->errstr_print;
+
+    if (t_errno == 0) {
+        return NULL;
+    }
+
+    memset(errstr_print, 0, TSK_ERROR_STRING_MAX_LENGTH);
+    if (t_errno & TSK_ERR_AUX) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_AUX_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUX:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUX:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_IMG) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_IMG_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "IMG:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "IMG:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_VS) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_VS_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "VS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "VS:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_FS) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_FS_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "FS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "FS:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_HDB) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_HDB_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "HDB:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "HDB:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_AUTO) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_AUTO_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUTO:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUTO:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_POOL) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_POOL_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "POOL:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "POOL:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else {
+        snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "UNKNOWN:%u:%s", t_errno, "unknown error");
+    }
+    pidx = strlen(errstr_print);
+
+    /* Print the unique string, if it exists */
+    if (error_info->errstr[0] != '\0') {
+        snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx,
+            " (%s)", error_info->errstr);
+        pidx = strlen(errstr_print);
+    }
+
+    if (error_info->errstr2[0] != '\0') {
+        snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx,
+            " (%s)", error_info->errstr2);
+        pidx = strlen(errstr_print);
+    }
+    return (char*)error_info->errstr_print;
+}
+
 /**
  * \ingroup baselib
  * Return the string with the current error message.  The string does not end with a
