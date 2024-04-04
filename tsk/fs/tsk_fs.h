@@ -994,7 +994,8 @@ extern "C" {
         const char *duname;     ///< string "name" of data unit type
         TSK_FS_INFO_FLAG_ENUM flags;    ///< flags for file system
         uint8_t fs_id[TSK_FS_INFO_FS_ID_LEN];   ///< File system id (as reported in boot sector)
-        size_t fs_id_used;      ///< Number of bytes in fs_id that are being used
+        uint8_t fs_name[16];     ///< VOUND  name of volume valid for ext. type volumes check ext - open 
+        size_t fs_id_used;       /// < Number of bytes in fs_id that are being used
 
         TSK_ENDIAN_ENUM endian; ///< Endian order of data
 

@@ -3468,12 +3468,12 @@ ext2fs_close(TSK_FS_INFO * fs)
  * @returns NULL on error or if data is not an Ext2/3 file system
  */
 TSK_FS_INFO *
-ext2fs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
+ext2fs_open(TSK_IMG_INFO* img_info, TSK_OFF_T offset,
     TSK_FS_TYPE_ENUM ftype, uint8_t test)
 {
-    EXT2FS_INFO *ext2fs;
+    EXT2FS_INFO* ext2fs;
     unsigned int len;
-    TSK_FS_INFO *fs;
+    TSK_FS_INFO* fs;
     ssize_t cnt;
 
     // clean up any error messages that are lying around
@@ -3493,7 +3493,7 @@ ext2fs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
         return NULL;
     }
 
-    if ((ext2fs = (EXT2FS_INFO *) tsk_fs_malloc(sizeof(*ext2fs))) == NULL)
+    if ((ext2fs = (EXT2FS_INFO*)tsk_fs_malloc(sizeof(*ext2fs))) == NULL)
         return NULL;
 
     fs = &(ext2fs->fs_info);
@@ -3508,13 +3508,13 @@ ext2fs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
      * Read the superblock.
      */
     len = sizeof(ext2fs_sb);
-    if ((ext2fs->fs = (ext2fs_sb *) tsk_malloc(len)) == NULL) {
+    if ((ext2fs->fs = (ext2fs_sb*)tsk_malloc(len)) == NULL) {
         fs->tag = 0;
-        tsk_fs_free((TSK_FS_INFO *)ext2fs);
+        tsk_fs_free((TSK_FS_INFO*)ext2fs);
         return NULL;
     }
 
-    cnt = tsk_fs_read(fs, EXT2FS_SBOFF, (char *) ext2fs->fs, len);
+    cnt = tsk_fs_read(fs, EXT2FS_SBOFF, (char*)ext2fs->fs, len);
     if (cnt != len) {
         if (cnt >= 0) {
             tsk_error_reset();
@@ -3523,7 +3523,7 @@ ext2fs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
         tsk_error_set_errstr2("ext2fs_open: superblock");
         fs->tag = 0;
         free(ext2fs->fs);
-        tsk_fs_free((TSK_FS_INFO *)ext2fs);
+        tsk_fs_free((TSK_FS_INFO*)ext2fs);
         return NULL;
     }
 
@@ -3533,7 +3533,7 @@ ext2fs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
     if (tsk_fs_guessu16(fs, ext2fs->fs->s_magic, EXT2FS_FS_MAGIC)) {
         fs->tag = 0;
         free(ext2fs->fs);
-        tsk_fs_free((TSK_FS_INFO *)ext2fs);
+        tsk_fs_free((TSK_FS_INFO*)ext2fs);
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_MAGIC);
         tsk_error_set_errstr("not an EXTxFS file system (magic)");
@@ -3566,6 +3566,9 @@ ext2fs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
     }
     fs->duname = "Fragment";
 
+    for (int n = 0; n < 16; n++) {
+        fs->fs_name[n] = ext2fs->fs->s_volume_name[n];
+    }
 
     /* we need to figure out if dentries are v1 or v2 */
     if (tsk_getu32(fs->endian, ext2fs->fs->s_feature_incompat) &

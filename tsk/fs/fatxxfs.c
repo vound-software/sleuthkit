@@ -433,14 +433,14 @@ fatxxfs_fsstat(TSK_FS_INFO * fs, FILE * hFile)
 }
 
 uint8_t
-fatxxfs_open(FATFS_INFO *fatfs)
+fatxxfs_open(FATFS_INFO* fatfs)
 {
-    const char *func_name = "fatxxfs_open";
-	TSK_FS_INFO *fs = &(fatfs->fs_info);
-	FATXXFS_SB *fatsb = (FATXXFS_SB*)(&fatfs->boot_sector_buffer);
-	int i = 0;
+    const char* func_name = "fatxxfs_open";
+    TSK_FS_INFO* fs = &(fatfs->fs_info);
+    FATXXFS_SB* fatsb = (FATXXFS_SB*)(&fatfs->boot_sector_buffer);
+    int i = 0;
     TSK_DADDR_T sectors = 0;
-	TSK_FS_DIR * test_dir1; // Directories used to try opening the root directory
+    TSK_FS_DIR* test_dir1; // Directories used to try opening the root directory
 
     // clean up any error messages that are lying around
     tsk_error_reset();
@@ -464,7 +464,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_MAGIC);
         tsk_error_set_errstr
-            ("Error: sector size (%d) is not a multiple of device size (%d)\nDo you have a disk image instead of a partition image?",
+        ("Error: sector size (%d) is not a multiple of device size (%d)\nDo you have a disk image instead of a partition image?",
             fatfs->ssize, fs->dev_bsize);
         if (tsk_verbose)
             fprintf(stderr, "%s: Invalid sector size (%d)\n",
@@ -512,9 +512,9 @@ fatxxfs_open(FATFS_INFO *fatfs)
 
     /* if secperfat16 is 0, then read sectperfat32 */
     if (0 == (fatfs->sectperfat =
-            tsk_getu16(fs->endian, fatsb->sectperfat16)))
+        tsk_getu16(fs->endian, fatsb->sectperfat16)))
         fatfs->sectperfat =
-            tsk_getu32(fs->endian, fatsb->a.f32.sectperfat32);
+        tsk_getu32(fs->endian, fatsb->a.f32.sectperfat32);
 
     if (fatfs->sectperfat == 0) {
         if (tsk_verbose)
@@ -524,7 +524,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_MAGIC);
         tsk_error_set_errstr
-            ("Not a FATXX file system (invalid sectors per FAT)");
+        ("Not a FATXX file system (invalid sectors per FAT)");
         return 1;
     }
 
@@ -533,7 +533,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_WALK_RNG);
         tsk_error_set_errstr
-            ("Not a FATXX file system (invalid first FAT sector %"
+        ("Not a FATXX file system (invalid first FAT sector %"
             PRIuDADDR ")", fatfs->firstfatsect);
         if (tsk_verbose)
             fprintf(stderr,
@@ -543,8 +543,8 @@ fatxxfs_open(FATFS_INFO *fatfs)
     }
 
     /* Calculate the block info
-     * 
-     * The sector of the beginning of the data area  - which is 
+     *
+     * The sector of the beginning of the data area  - which is
      * after all of the FATs
      *
      * For TSK_FS_TYPE_FAT12 and TSK_FS_TYPE_FAT16, the data area starts with the root
@@ -556,7 +556,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
         fatfs->sectperfat * fatfs->numfat;
 
     /* The sector where the first cluster is located.  It will be used
-     * to translate cluster addresses to sector addresses 
+     * to translate cluster addresses to sector addresses
      *
      * For TSK_FS_TYPE_FAT32, the first cluster is the start of the data area and
      * it is after the root directory for TSK_FS_TYPE_FAT12 and TSK_FS_TYPE_FAT16.  At this
@@ -599,7 +599,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_MAGIC);
             tsk_error_set_errstr
-                ("Too many sectors for TSK_FS_TYPE_FAT12: try auto-detect mode");
+            ("Too many sectors for TSK_FS_TYPE_FAT12: try auto-detect mode");
             if (tsk_verbose)
                 fprintf(stderr,
                     "%s: Too many sectors for FAT12\n", func_name);
@@ -611,7 +611,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_MAGIC);
         tsk_error_set_errstr
-            ("Invalid TSK_FS_TYPE_FAT32 image (numroot != 0)");
+        ("Invalid TSK_FS_TYPE_FAT32 image (numroot != 0)");
         if (tsk_verbose)
             fprintf(stderr, "%s: numroom != 0 for FAT32\n", func_name);
         return 1;
@@ -621,7 +621,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_MAGIC);
         tsk_error_set_errstr
-            ("Invalid FAT image (numroot == 0, and not TSK_FS_TYPE_FAT32)");
+        ("Invalid FAT image (numroot == 0, and not TSK_FS_TYPE_FAT32)");
         if (tsk_verbose)
             fprintf(stderr, "%s: numroom == 0 and not FAT32\n", func_name);
         return 1;
@@ -629,7 +629,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
 
     /* additional sanity checks if we think we are using the backup boot sector.
      * The scenario to prevent here is if fat_open is called 6 sectors before the real start
-     * of the file system, then we want to detect that it was not a backup that we saw.  
+     * of the file system, then we want to detect that it was not a backup that we saw.
      */
     if (fatfs->using_backup_boot_sector) {
         // only FAT32 has backup boot sectors..
@@ -637,7 +637,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_MAGIC);
             tsk_error_set_errstr
-                ("Invalid FAT image (Used what we thought was a backup boot sector, but it is not TSK_FS_TYPE_FAT32)");
+            ("Invalid FAT image (Used what we thought was a backup boot sector, but it is not TSK_FS_TYPE_FAT32)");
             if (tsk_verbose)
                 fprintf(stderr,
                     "%s: Had to use backup boot sector, but this isn't FAT32\n", func_name);
@@ -648,11 +648,11 @@ fatxxfs_open(FATFS_INFO *fatfs)
             uint8_t buf2[512];
             int i2;
             int numDiffs;
-	        ssize_t cnt = 0;
+            ssize_t cnt = 0;
 
             cnt =
                 tsk_fs_read(fs, fatfs->firstfatsect * fatfs->ssize,
-                (char *) buf1, 512);
+                    (char*)buf1, 512);
             if (cnt != 512) {
                 if (cnt >= 0) {
                     tsk_error_reset();
@@ -665,8 +665,8 @@ fatxxfs_open(FATFS_INFO *fatfs)
 
             cnt =
                 tsk_fs_read(fs,
-                (fatfs->firstfatsect + fatfs->sectperfat) * fatfs->ssize,
-                (char *) buf2, 512);
+                    (fatfs->firstfatsect + fatfs->sectperfat) * fatfs->ssize,
+                    (char*)buf2, 512);
             if (cnt != 512) {
                 if (cnt >= 0) {
                     tsk_error_reset();
@@ -687,7 +687,7 @@ fatxxfs_open(FATFS_INFO *fatfs)
                 tsk_error_reset();
                 tsk_error_set_errno(TSK_ERR_FS_MAGIC);
                 tsk_error_set_errstr
-                    ("Invalid FAT image (Too many differences between FATS from guessing (%d diffs))",
+                ("Invalid FAT image (Too many differences between FATS from guessing (%d diffs))",
                     numDiffs);
                 if (tsk_verbose)
                     fprintf(stderr,
@@ -741,23 +741,23 @@ fatxxfs_open(FATFS_INFO *fatfs)
     fs->block_size = fatfs->ssize;
 
     // determine the last block we have in this image
-    if ((TSK_DADDR_T) ((fatfs->fs_info.img_info->size - fatfs->fs_info.offset) / fs->block_size) <
+    if ((TSK_DADDR_T)((fatfs->fs_info.img_info->size - fatfs->fs_info.offset) / fs->block_size) <
         fs->block_count)
         fs->last_block_act =
-            (fatfs->fs_info.img_info->size - fatfs->fs_info.offset) / fs->block_size - 1;
+        (fatfs->fs_info.img_info->size - fatfs->fs_info.offset) / fs->block_size - 1;
 
     /*
      * inode calculations
      */
 
-    /* maximum number of dentries in a sector & cluster */
+     /* maximum number of dentries in a sector & cluster */
     fatfs->dentry_cnt_se = fatfs->ssize / sizeof(FATXXFS_DENTRY);
     fatfs->dentry_cnt_cl = fatfs->dentry_cnt_se * fatfs->csize;
 
     fs->root_inum = FATFS_ROOTINO;
     fs->first_inum = FATFS_FIRSTINO;
 
-    /* Calculate inode addresses for the virtual files (MBR, one or two FATS) 
+    /* Calculate inode addresses for the virtual files (MBR, one or two FATS)
      * and the virtual orphan files directory. */
     fs->last_inum = (FATFS_SECT_2_INODE(fatfs, fs->last_block_act + 1) - 1) + FATFS_NUM_VIRT_FILES(fatfs);
     fatfs->mbr_virt_inum = fs->last_inum - FATFS_NUM_VIRT_FILES(fatfs) + 1;
@@ -776,13 +776,21 @@ fatxxfs_open(FATFS_INFO *fatfs)
     for (fs->fs_id_used = 0; fs->fs_id_used < 4; fs->fs_id_used++) {
         if (fatfs->fs_info.ftype == TSK_FS_TYPE_FAT32)
             fs->fs_id[fs->fs_id_used] =
-                fatsb->a.f32.vol_id[fs->fs_id_used];
+            fatsb->a.f32.vol_id[fs->fs_id_used];
         else
             fs->fs_id[fs->fs_id_used] =
-                fatsb->a.f16.vol_id[fs->fs_id_used];
+            fatsb->a.f16.vol_id[fs->fs_id_used];
     }
 
-    /*
+    // Vound provide file system level label
+    for (int i = 0; i < 11; i++) {
+        if (fatfs->fs_info.ftype == TSK_FS_TYPE_FAT32)
+            fs->fs_name[i] = fatsb->a.f32.vol_lab[i];
+        else
+            fs->fs_name[i] = fatsb->a.f16.vol_lab[i];
+    }
+
+     /*
      * Set the function pointers  
      */
 

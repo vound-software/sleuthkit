@@ -788,10 +788,12 @@ size_t tsk_fs_fs_id_read(TSK_FS_INFO* fs_info, char* buffer, size_t len) {
         }
     }
  
-    for (i = 0; i < real_used && i < TSK_FS_INFO_FS_ID_LEN; i++) {
-        buffer[i] = fs_info->fs_id[i];
+    for (i = 0; (i < fs_info->fs_name) && (i < 16); i++) {
+        if (fs_info->fs_name[i] == 0) {
+            break;
+        }
+        buffer[i] = fs_info->fs_name[i];
     }
-   
     return i;
 }
 
