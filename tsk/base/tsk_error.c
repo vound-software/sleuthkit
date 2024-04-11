@@ -196,6 +196,7 @@ tsk_error_get_vound()
     }
 
     memset(errstr_print, 0, TSK_ERROR_STRING_MAX_LENGTH);
+    
     if (t_errno & TSK_ERR_AUX) {
         if ((TSK_ERR_MASK & t_errno) < TSK_ERR_AUX_MAX)
             snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUX:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
@@ -204,37 +205,37 @@ tsk_error_get_vound()
     }
     else if (t_errno & TSK_ERR_IMG) {
         if ((TSK_ERR_MASK & t_errno) < TSK_ERR_IMG_MAX)
-            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "IMG:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "IMG:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_img_str[t_errno & TSK_ERR_MASK]);
         else
             snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "IMG:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
     }
     else if (t_errno & TSK_ERR_VS) {
         if ((TSK_ERR_MASK & t_errno) < TSK_ERR_VS_MAX)
-            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "VS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "VS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_mm_str[t_errno & TSK_ERR_MASK]);
         else
             snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "VS:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
     }
     else if (t_errno & TSK_ERR_FS) {
         if ((TSK_ERR_MASK & t_errno) < TSK_ERR_FS_MAX)
-            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "FS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "FS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_fs_str[t_errno & TSK_ERR_MASK]);
         else
             snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "FS:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
     }
     else if (t_errno & TSK_ERR_HDB) {
         if ((TSK_ERR_MASK & t_errno) < TSK_ERR_HDB_MAX)
-            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "HDB:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "HDB:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_hdb_str[t_errno & TSK_ERR_MASK]);
         else
             snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "HDB:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
     }
     else if (t_errno & TSK_ERR_AUTO) {
         if ((TSK_ERR_MASK & t_errno) < TSK_ERR_AUTO_MAX)
-            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUTO:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUTO:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_auto_str[t_errno & TSK_ERR_MASK]);
         else
             snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUTO:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
     }
     else if (t_errno & TSK_ERR_POOL) {
         if ((TSK_ERR_MASK & t_errno) < TSK_ERR_POOL_MAX)
-            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "POOL:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "POOL:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_pool_str[t_errno & TSK_ERR_MASK]);
         else
             snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "POOL:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
     }
