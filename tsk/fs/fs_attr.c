@@ -898,9 +898,16 @@ tsk_fs_attr_append_run(TSK_FS_INFO * a_fs, TSK_FS_ATTR * a_fs_attr,
         // just in case this was not updated
         if ((a_fs_attr->nrd.run_end == NULL)
             || (a_fs_attr->nrd.run_end->next != NULL)) {
+            
+            int counter = 0;
+
             data_run_cur = a_fs_attr->nrd.run;
             while (data_run_cur->next) {
                 data_run_cur = data_run_cur->next;
+
+                if (++counter > LOGICAL_MAX_ATTR_RUN) {
+                    break;
+                }
             }
             a_fs_attr->nrd.run_end = data_run_cur;
         }
