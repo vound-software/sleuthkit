@@ -870,7 +870,81 @@ tsk_fs_attr_add_run(TSK_FS_INFO * a_fs, TSK_FS_ATTR * a_fs_attr,
 
     return 0;
 }
+/**------------------------------------------------------------------ - 
+* Vound performance start
+*/
 
+TSK_FS_ATTR_RUN* tsk_fs_attr_find_last_run(TSK_FS_INFO* a_fs, TSK_FS_ATTR* a_fs_attr){
+
+    TSK_FS_ATTR_RUN* data_run_cur = NULL;
+
+    if (a_fs_attr == NULL) {
+        return NULL;
+    }
+
+    if (a_fs_attr->nrd.run == NULL) {
+    
+        return NULL;
+
+    }
+
+
+    if ((a_fs_attr->nrd.run_end == NULL)
+        || (a_fs_attr->nrd.run_end->next != NULL)) {
+        int counter = 0;
+
+        data_run_cur = a_fs_attr->nrd.run;
+
+        while (data_run_cur->next) {
+
+            data_run_cur = data_run_cur->next;
+
+            if (++counter > LOGICAL_MAX_ATTR_RUN) {
+                break;
+            }
+        }
+        a_fs_attr->nrd.run_end = data_run_cur;
+    }
+    return data_run_cur;
+}
+
+
+extern TSK_FS_ATTR_RUN* tsk_fs_attr_run_append(TSK_FS_ATTR_RUN* data_run, TSK_FS_ATTR_RUN* to_last_run, TSK_FS_ATTR* a_fs_attr) {
+
+    if ((data_run == NULL) || (a_fs_attr == NULL)) {
+        return data_run;
+    }
+
+    if (a_fs_attr->nrd.run == NULL) {
+        a_fs_attr->nrd.run = data_run;
+        data_run->offset = 0;
+    }
+    else {
+        // just in case this was not updated
+
+        to_last_run->next = data_run;
+        data_run->offset =
+            to_last_run->offset + to_last_run->len;
+    }
+
+    // update the rest of the offsets in the run (if any exist)
+    TSK_FS_ATTR_RUN* data_run_cur = data_run;
+   
+    while (data_run_cur->next) {
+        data_run_cur->next->offset =
+            data_run_cur->offset + data_run_cur->len;
+        a_fs_attr->nrd.run_end = data_run_cur->next;
+        data_run_cur = data_run_cur->next;
+    }
+
+    return data_run;
+
+}
+
+
+/**------------------------------------------------------------------ -
+* Vound performance end
+* /
 
 /**
  * Append a data run to the end of the attribute and update its offset
@@ -884,7 +958,7 @@ void
 tsk_fs_attr_append_run(TSK_FS_INFO * a_fs, TSK_FS_ATTR * a_fs_attr,
     TSK_FS_ATTR_RUN * a_data_run)
 {
-    TSK_FS_ATTR_RUN *data_run_cur;
+    TSK_FS_ATTR_RUN *data_run_cur; 
 
     if ((a_fs_attr == NULL) || (a_data_run == NULL)) {
         return;
