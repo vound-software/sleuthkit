@@ -60,10 +60,9 @@ unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
     /* Note that we are lazy about length.  We stop only when a run is past length,
      * we do not end exactly at length -- although that should happen anyway.  
      */
-    int sw = 0;
-    TSK_FS_ATTR_RUN* last_run;
-
-    last_run = tsk_fs_attr_find_last_run(fs, fs_attr);
+    
+    TSK_FS_ATTR_RUN* last_run = 
+        tsk_fs_attr_find_last_run(fs, fs_attr);
 
     for (i = 0; i < addr_len; i++) {
 
