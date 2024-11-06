@@ -17,6 +17,86 @@
 #include "tsk_ffs.h"
 #include "tsk_ext2fs.h"
 
+#ifndef LOGICAL_MAX_ATTR_RUN
+    // redefinition of tsk_logical_fs.h
+    #define LOGICAL_MAX_ATTR_RUN 0x7fffffff
+#endif
+
+/**------------------------------------------------------------------ -
+* Vound performance start
+*/
+
+inline TSK_FS_ATTR_RUN* tsk_fs_attr_vound_find_last_run(TSK_FS_INFO* a_fs, TSK_FS_ATTR* a_fs_attr) {
+
+    TSK_FS_ATTR_RUN* data_run_cur = NULL;
+
+    if (a_fs_attr == NULL) {
+        return NULL;
+    }
+
+    if (a_fs_attr->nrd.run == NULL) {
+
+        return NULL;
+
+    }
+
+
+    if ((a_fs_attr->nrd.run_end == NULL)
+        || (a_fs_attr->nrd.run_end->next != NULL)) {
+        int counter = 0;
+
+        data_run_cur = a_fs_attr->nrd.run;
+
+        while (data_run_cur->next) {
+
+            data_run_cur = data_run_cur->next;
+
+            if (++counter > LOGICAL_MAX_ATTR_RUN ) {
+                break;
+            }
+        }
+        a_fs_attr->nrd.run_end = data_run_cur;
+    }
+    return data_run_cur;
+}
+
+inline TSK_FS_ATTR_RUN* tsk_fs_attr_vound_data_run_append(TSK_FS_ATTR_RUN* data_run, TSK_FS_ATTR_RUN* to_last_run, TSK_FS_ATTR* a_fs_attr) {
+
+    if ((data_run == NULL) || (a_fs_attr == NULL)) {
+        return data_run;
+    }
+
+    if (a_fs_attr->nrd.run == NULL) {
+        a_fs_attr->nrd.run = data_run;
+        data_run->offset = 0;
+    }
+    else {
+        // just in case this was not updated
+
+        to_last_run->next = data_run;
+        data_run->offset =
+            to_last_run->offset + to_last_run->len;
+    }
+
+    // update the rest of the offsets in the run (if any exist)
+    TSK_FS_ATTR_RUN* data_run_cur = data_run;
+
+    while (data_run_cur->next) {
+        data_run_cur->next->offset =
+            data_run_cur->offset + data_run_cur->len;
+        a_fs_attr->nrd.run_end = data_run_cur->next;
+        data_run_cur = data_run_cur->next;
+    }
+
+    return data_run;
+
+}
+
+
+/**------------------------------------------------------------------ -
+* Vound performance end
+* /
+
 
 /*********** MAKE DATA RUNS ***************/
 
@@ -62,7 +142,7 @@ unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
      */
     
     TSK_FS_ATTR_RUN* last_run = 
-        tsk_fs_attr_find_last_run(fs, fs_attr);
+        tsk_fs_attr_vound_find_last_run(fs, fs_attr);
 
     for (i = 0; i < addr_len; i++) {
 
@@ -90,7 +170,7 @@ unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
 
             // save the run
 
-            last_run = tsk_fs_attr_run_append(data_run, last_run, fs_attr);
+            last_run = tsk_fs_attr_vound_data_run_append(data_run, last_run, fs_attr);
           
 
             // get ready for the next run

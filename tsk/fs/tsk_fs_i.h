@@ -107,12 +107,6 @@ extern "C" {
         TSK_FS_ATTR * a_fs_attr, TSK_FS_ATTR_RUN * a_data_run);
     extern uint8_t tsk_fs_attr_print(const TSK_FS_ATTR * a_fs_attr, FILE * hFile);
 
-    // VOUND START
-    
-    extern TSK_FS_ATTR_RUN* tsk_fs_attr_find_last_run(TSK_FS_INFO* a_fs, TSK_FS_ATTR* a_fs_attr);
-    extern TSK_FS_ATTR_RUN* tsk_fs_attr_run_append(TSK_FS_ATTR_RUN* data_run, TSK_FS_ATTR_RUN* to_last_run, TSK_FS_ATTR* a_fs_attr);
-
-    //VOUND End
     /* FS_DATALIST */
     extern TSK_FS_ATTRLIST *tsk_fs_attrlist_alloc();
     extern void tsk_fs_attrlist_free(TSK_FS_ATTRLIST *);
