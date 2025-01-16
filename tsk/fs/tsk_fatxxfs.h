@@ -38,9 +38,8 @@
  * Have seen FAT image that uses non-standard flags in the short name (00 00 -> unallocated, 20 00 -> allocated)
  */
 #define FATXXFS_IS_DELETED(name, fatfs)	\
-	(fatfs->subtype == TSK_FATFS_SUBTYPE_ANDROID_1) ? \
-	((name[0] == 0) && (name[1] == 0)) : \
-	(name[0] == FATXXFS_SLOT_DELETED) 
+    (name[0] == FATXXFS_SLOT_DELETED) ? 1 : \
+    (fatfs->subtype == TSK_FATFS_SUBTYPE_ANDROID_1) && (name[0] == 0) && (name[1] == 0)
 
 /* 
  *Return 1 if c is an valid character for a short file name 

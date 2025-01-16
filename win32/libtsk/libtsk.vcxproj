@@ -302,7 +302,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.pdb" "
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf-stable\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
