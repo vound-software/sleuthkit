@@ -108,6 +108,15 @@ Makefile
 .deps
 .libs
 *.swp
+*.obj
+*ipdb
+*.recipie
+*.iobj
+*.log
+*.cache
+*.tlog
+
+
 
 #javadoc generated
 /bindings/java/javadoc

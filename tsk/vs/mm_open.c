@@ -107,7 +107,7 @@ tsk_vs_open(TSK_IMG_INFO * img_info, TSK_DADDR_T offset,
                 if (prev_type != NULL) {
 
                     /* GPT drives have a DOS Safety partition table.
-                     * Test to see if the GPT has a safety partiiton
+                     * Test to see if the GPT has a safety partition
                      * and then we can igore the DOS */
                     if (strcmp(prev_type, "DOS") == 0) {
                         TSK_VS_PART_INFO *tmp_set;

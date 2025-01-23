@@ -173,7 +173,7 @@
     <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'">
-    <TargetName>$(ProjectName)-x64</TargetName>
+    <TargetName>$(ProjectName)-experimental-x64</TargetName>
     <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\NugetPackages.props" />
@@ -303,7 +303,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.pdb" "
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf-stable\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -315,7 +315,9 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\Win32\Release\libaff4-x86.pdb" "
       <DisableSpecificWarnings>4200;4814;5030</DisableSpecificWarnings>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <BuildStlModules />
+      <DisableAnalyzeExternal />
     </ClCompile>
     <PreBuildEvent>
       <Command>copy "$(ProjectDir)..\..\..\libewf\msvscpp\x64\Release\libewf-x64.dll" "$(OutDir)"
@@ -338,7 +340,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libewf-exp\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -357,7 +359,6 @@ copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.dll" "$(OutD
 copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.dll" "$(OutDir)"
 copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\c64\Release\libaff4-x64.dll" "$(OutDir)"
 
-
 copy "$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release\libewf-exp-x64.pdb" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release\libvmdk-x64.pdb" "$(OutDir)"
 copy "$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release\libvhdi-x64.pdb" "$(OutDir)"
@@ -365,7 +366,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(
     </PreBuildEvent>
     <Link>
       <AdditionalDependencies>zlib-x64.lib;libewf-experimental-x64.lib;libvhdi-x64.lib;libvmdk-x64.lib;libaff4-x64.lib;libcrypto.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\libewf-exp\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvhdi\msvscpp\x64\Release;$(ProjectDir)..\..\..\libvmdk\msvscpp\x64\Release;$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release;$(ProjectDir)..\..\..\AFFLIBv3\x64\afflib\Release;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoLibs|x64'">
