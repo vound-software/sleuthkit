@@ -20,6 +20,8 @@
 #include "tsk_ntfs.h"
 
 #include <ctype.h>
+#include <stddef.h>
+#include "encryptionHelper.h"
 
 /**
  * \file ntfs.c
@@ -84,6 +86,8 @@
  * subtract the number of seconds between 1601 and 1970
  * i.e. TIME - DELTA
  *
+ * Returns 0 if NT date is outside of Unix range
+ *
  */
 uint32_t
 nt2unixtime(uint64_t ntdate)
@@ -91,8 +95,16 @@ nt2unixtime(uint64_t ntdate)
 // (369*365 + 89) * 24 * 3600 * 10000000
 #define	NSEC_BTWN_1601_1970	(uint64_t)(116444736000000000ULL)
 
+    // return 0 if before 1970
+    if (ntdate < NSEC_BTWN_1601_1970) 
+        return 0;
+
     ntdate -= (uint64_t) NSEC_BTWN_1601_1970;
     ntdate /= (uint64_t) 10000000;
+
+    // return if beyond 32-bit epoch range
+    if (ntdate > 0xffffffffULL) 
+        return 0;
 
     return (uint32_t) ntdate;
 }
@@ -326,7 +338,7 @@ ntfs_dinode_lookup(NTFS_INFO * a_ntfs, char *a_buf, TSK_INUM_T a_mftnum)
         cnt =
             tsk_fs_read(&a_ntfs->fs_info, mftaddr_b, a_buf,
             a_ntfs->mft_rsize_b);
-        if (cnt != a_ntfs->mft_rsize_b) {
+        if (cnt != (ssize_t) a_ntfs->mft_rsize_b) {
             if (cnt >= 0) {
                 tsk_error_reset();
                 tsk_error_set_errno(TSK_ERR_FS_READ);
@@ -539,7 +551,7 @@ is_clustalloc(NTFS_INFO * ntfs, TSK_DADDR_T addr)
         cnt = tsk_fs_read_block
             (&ntfs->fs_info, fsaddr, ntfs->bmap_buf,
             ntfs->fs_info.block_size);
-        if (cnt != ntfs->fs_info.block_size) {
+        if (cnt != (ssize_t) ntfs->fs_info.block_size) {
             tsk_release_lock(&ntfs->lock);
             if (cnt >= 0) {
                 tsk_error_reset();
@@ -636,7 +648,7 @@ ntfs_make_data_run(NTFS_INFO * ntfs, TSK_OFF_T start_vcn,
          * A length of more than eight bytes will not fit in the
          * 64-bit length field (and is likely corrupt)
          */
-        if (NTFS_RUNL_LENSZ(run) > 8 || NTFS_RUNL_LENSZ(run) > runlist_size - runlist_offset - 1) {
+        if (NTFS_RUNL_LENSZ(run) > 8 || (uint32_t) NTFS_RUNL_LENSZ(run) > runlist_size - runlist_offset - 1) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
             tsk_error_set_errstr
@@ -678,7 +690,7 @@ ntfs_make_data_run(NTFS_INFO * ntfs, TSK_OFF_T start_vcn,
          * An address offset of more than eight bytes will not fit in the
          * 64-bit addr_offset field (and is likely corrupt)
          */
-        if (NTFS_RUNL_OFFSZ(run) > 8) {
+        if (NTFS_RUNL_OFFSZ(run) > 8 || (uint32_t) ( NTFS_RUNL_LENSZ(run) + NTFS_RUNL_OFFSZ(run) ) > runlist_size - runlist_offset - 1) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
             tsk_error_set_errstr
@@ -1215,7 +1227,7 @@ ntfs_proc_compunit(NTFS_INFO * ntfs, NTFS_COMP_INFO * comp,
             cnt =
                 tsk_fs_read_block(fs, comp_unit[a],
                 &comp->comp_buf[comp->comp_len], fs->block_size);
-            if (cnt != fs->block_size) {
+            if (cnt != (ssize_t) fs->block_size) {
                 if (cnt >= 0) {
                     tsk_error_reset();
                     tsk_error_set_errno(TSK_ERR_FS_READ);
@@ -1254,7 +1266,7 @@ ntfs_proc_compunit(NTFS_INFO * ntfs, NTFS_COMP_INFO * comp,
             cnt =
                 tsk_fs_read_block(fs, comp_unit[a],
                 &comp->uncomp_buf[comp->uncomp_idx], fs->block_size);
-            if (cnt != fs->block_size) {
+            if (cnt != (ssize_t) fs->block_size) {
                 if (cnt >= 0) {
                     tsk_error_reset();
                     tsk_error_set_errno(TSK_ERR_FS_READ);
@@ -1461,7 +1473,7 @@ ntfs_attr_walk_special(const TSK_FS_ATTR * fs_attr,
                         if (has_init_size && (off < fs_attr->nrd.initsize)) {
                             const int64_t prev_remanining_init_size = fs_attr->nrd.initsize - off;
                             if (prev_remanining_init_size < (int64_t)comp.buf_size_b) {
-                                memset(&comp.uncomp_buf[prev_remanining_init_size], 0, comp.buf_size_b - prev_remanining_init_size);
+                                memset(&comp.uncomp_buf[prev_remanining_init_size], 0, comp.buf_size_b - (size_t)prev_remanining_init_size);
                                 init_size_reached = 1;
                             }
                         }
@@ -1728,7 +1740,7 @@ ntfs_file_read_special(const TSK_FS_ATTR * a_fs_attr,
                         if (has_init_size) {
                             const int64_t remanining_init_size = a_fs_attr->nrd.initsize - buf_idx - a_offset;
                             if (remanining_init_size < (int64_t)comp.buf_size_b) {
-                                memset(comp.uncomp_buf + remanining_init_size, 0, comp.buf_size_b - remanining_init_size);
+                                memset(comp.uncomp_buf + remanining_init_size, 0, comp.buf_size_b - (size_t)remanining_init_size);
                                 init_size_reached = 1;
                             }
                         }
@@ -1886,8 +1898,10 @@ ntfs_proc_attrseq(NTFS_INFO * ntfs,
 
         // Ensure that the name offset doesn't refer to a location beyond
         // the attribute.
-        if (((uintptr_t)attr + tsk_getu16(fs->endian, attr->name_off)) > 
-            ((uintptr_t)attr + tsk_getu32(fs->endian, attr->len))) {
+        uint16_t attr_name_off = tsk_getu16(fs->endian, attr->name_off);
+        uint32_t attr_len = tsk_getu32(fs->endian, attr->len);
+        // Note that it is valid for the name offset to be equal to the attribute length.
+        if ((uint32_t) attr_name_off > attr_len) {
             break;
         }
 
@@ -1900,11 +1914,13 @@ ntfs_proc_attrseq(NTFS_INFO * ntfs,
          * entry is in there.  Use that ID instead so that we always have
          * unique IDs for each attribute -- even if it spans multiple MFT entries. */
         if (a_attr_map) {
+            if ((uint32_t) attr->nlen > (attr_len - (uint32_t) attr_name_off) / 2) {
+                break;
+            }
             for (i = 0; i < a_attr_map->num_used; i++) {
                 if ((a_attr_map->type[i] == type) &&
                     (memcmp(a_attr_map->name[i],
-                            (void *) ((uintptr_t) attr +
-                                tsk_getu16(fs->endian, attr->name_off)),
+                            (void *) ((uintptr_t) attr + attr_name_off),
                             attr->nlen * 2) == 0)) {
                     id_new = a_attr_map->newId[i];
                     break;
@@ -1913,14 +1929,13 @@ ntfs_proc_attrseq(NTFS_INFO * ntfs,
         }
 
         /* Copy the name and convert it to UTF8 */
-        const uint16_t nameoff = tsk_getu16(fs->endian, attr->name_off);
-        if (attr->nlen && nameoff + (uint32_t) attr->nlen * 2 < tsk_getu32(fs->endian, attr->len)) {
+        if (attr->nlen && ((uint32_t) attr->nlen * 2) < attr_len - attr_name_off) {
             int i;
             UTF8 *name8;
             UTF16 *name16;
 
             name8 = (UTF8 *) name;
-            name16 = (UTF16 *) ((uintptr_t) attr + nameoff);
+            name16 = (UTF16 *) ((uintptr_t) attr + attr_name_off);
 
             retVal =
                 tsk_UTF16toUTF8(fs->endian, (const UTF16 **) &name16,
@@ -2351,8 +2366,8 @@ ntfs_proc_attrseq(NTFS_INFO * ntfs,
                     ("proc_attrseq: resident data offset of File Name Attribute is out of bounds!");
                 return TSK_COR;
             }
-            // A File Name Attribute should be at least 66 bytes in size
-            if ((attr_len < 66) || (attr_off > attr_len - 66)) {
+            // A File Name Attribute must be large enough to hold the fixed fields.
+            if (attr_off + (uint32_t)offsetof(ntfs_attr_fname, name) > attr_len) {
                 tsk_error_reset();
                 tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
                 tsk_error_set_errstr
@@ -2413,7 +2428,7 @@ ntfs_proc_attrseq(NTFS_INFO * ntfs,
                 }
                 fs_name->next = NULL;
             }
-            if (fname->nlen > attr_len - 66) {
+            if (attr_off + (uint32_t)offsetof(ntfs_attr_fname, name) + (uint32_t)fname->nlen * 2 > attr_len) {
                 tsk_error_reset();
                 tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
                 tsk_error_set_errstr
@@ -3302,7 +3317,7 @@ ntfs_load_bmap(NTFS_INFO * ntfs)
 
     if ((run_off < 48) ||
         (run_off >= attr_len) ||
-        ((uintptr_t) data_attr + run_off) > ((uintptr_t) mft + (uintptr_t) ntfs->mft_rsize_b)) {
+        ((uintptr_t) data_attr + run_off) >= ((uintptr_t) mft + (uintptr_t) ntfs->mft_rsize_b)) {
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
         tsk_error_set_errstr("Invalid run_off of Bitmap Data Attribute - value out of bounds");
@@ -3339,7 +3354,7 @@ ntfs_load_bmap(NTFS_INFO * ntfs)
     cnt =
         tsk_fs_read_block(fs,
         ntfs->bmap->addr, ntfs->bmap_buf, fs->block_size);
-    if (cnt != fs->block_size) {
+    if (cnt != (ssize_t) fs->block_size) {
         if (cnt >= 0) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_READ);
@@ -3609,7 +3624,7 @@ ntfs_get_sds(TSK_FS_INFO * fs, uint32_t secid)
 		}
 		tsk_error_reset();
 		tsk_error_set_errno(TSK_ERR_FS_GENFS);
-		tsk_error_set_errstr("ntfs_get_sds: SII entry %" PRIu32 " not found");
+		tsk_error_set_errstr("ntfs_get_sds: SII entry %" PRIu32 " not found", secid);
 	}
 
 	// If we never even found an SII entry that matched our secid, update the error state.
@@ -5179,7 +5194,10 @@ static int
 process_kape_boot_format(NTFS_INFO* ntfs_info) {
 
     // Check that we have a VHD
-    if (ntfs_info->fs_info.img_info->itype != TSK_IMG_TYPE_VHD_VHD) {
+    // for intella vhd is pprocessed as external image
+    if (
+        (ntfs_info->fs_info.img_info->itype != TSK_IMG_TYPE_VHD_VHD) &&
+        (ntfs_info->fs_info.img_info->itype != TSK_IMG_TYPE_EXTERNAL)) {
         return 1;
     }
 
@@ -5209,12 +5227,13 @@ process_kape_boot_format(NTFS_INFO* ntfs_info) {
  * @param img_info Disk image to analyze
  * @param offset Byte offset where NTFS file system starts
  * @param ftype Specific type of NTFS file system
+ * @param a_pass (Optional) bitlocker password
  * @param test NOT USED
  * @returns NULL on error or if data is not an NTFS file system
  */
 TSK_FS_INFO *
 ntfs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
-    TSK_FS_TYPE_ENUM ftype, uint8_t test)
+    TSK_FS_TYPE_ENUM ftype, const char* a_pass, uint8_t test)
 {
     char *myname = "ntfs_open";
     NTFS_INFO *ntfs = NULL;
@@ -5256,6 +5275,14 @@ ntfs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
     ntfs->bmap = NULL;
     ntfs->bmap_buf = NULL;
 
+    // Check for any volume encryption and initialize if found.
+    // A non-zero value will only be returned if we are very confident encryption was found
+    // but encountered an error and should not continue trying to open the volume. 
+    // In this case we should also have a specific error to get back to the user, such as reporting an incorrect password.
+    if (0 != handleVolumeEncryption((TSK_FS_INFO*)ntfs, a_pass)) {
+        goto on_error;
+    }
+
     /* Read the boot sector */
     len = roundup(sizeof(ntfs_sb), img_info->sector_size);
     ntfs->fs = (ntfs_sb *) tsk_malloc(len);
@@ -5264,7 +5291,7 @@ ntfs_open(TSK_IMG_INFO * img_info, TSK_OFF_T offset,
     }
 
     cnt = tsk_fs_read(fs, (TSK_OFF_T) 0, (char *) ntfs->fs, len);
-    if (cnt != len) {
+    if (cnt != (ssize_t) len) {
         if (cnt >= 0) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_READ);

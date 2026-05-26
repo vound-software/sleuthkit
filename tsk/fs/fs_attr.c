@@ -35,6 +35,155 @@
 #include "tsk_fs_i.h"
 #include "tsk_logical_fs.h"
 
+TSK_FS_ATTR_RUN* storage;
+char* taken;
+
+int max_element = 0;
+int last_taken = -1;
+char ext_allocator = 0;
+
+TSK_FS_ATTR_RUN* tsk_fs_attr_run_alloc_no_ext();
+void tsk_fs_attr_run_free_no_ext(TSK_FS_ATTR_RUN* fs_attr_run);
+void return_to_the_pool_internal(TSK_FS_ATTR_RUN* run);
+
+int tsk_fs_attr_initialize_unix(number_of_blocks) {
+
+    if (max_element > 0 && (number_of_blocks > max_element)) {
+        for (int i = 0; i < max_element; i++) {
+            if (taken[i] == 1) {
+                return 1;
+            }
+        }
+        free(storage);
+        storage = 0;
+        free(taken);
+        taken = 0;
+        max_element = 0;
+        taken = -1;
+    }
+
+    if (max_element == 0) {
+        storage = (TSK_FS_ATTR_RUN*)tsk_malloc(number_of_blocks * sizeof(TSK_FS_ATTR_RUN));
+        if (storage == 0) {
+            return 1;
+        }
+
+        taken = tsk_malloc(number_of_blocks * sizeof(char));
+        if (taken == 0) {
+            free(storage);
+            storage = 0;
+            return 1;
+        }
+        max_element = number_of_blocks;
+    }
+    ext_allocator = 1;
+    return 0;
+}
+
+/**
+ * \internal
+ * Allocate a run list entry.
+ *
+ * @returns NULL on error
+ */
+int find_free_internal() {
+
+    if (max_element > 0) {
+        if (last_taken < max_element - 1) {
+            int index = last_taken + 1;
+            if (taken[index] == 0) {
+                taken[index] = 1;
+                last_taken = index;
+                return index;
+            }
+        }
+
+        for (int i = 0; i < max_element; i++) {
+            if (taken[i] == 0) {
+                taken[i] = 1;
+                last_taken = i;
+                return i;
+            }
+        }
+    }
+    tsk_error_reset();
+    tsk_error_set_errno(TSK_ERR_FS_GENFS);
+    tsk_error_set_errstr
+    ("fs_attr.c->find_free:: Could nor find free memory slot to allocate TSK_FS_ATTR_RUN");
+
+    return max_element;
+}
+
+TSK_FS_ATTR_RUN* tsk_fs_attr_run_alloc()
+{
+    if (ext_allocator == 1) {
+        int element = find_free_internal();
+
+        if (element < max_element) {
+            TSK_FS_ATTR_RUN* run = &storage[element];
+            memset(run, 0, sizeof(TSK_FS_ATTR_RUN));
+            return run;
+        }
+        return 0;
+    }
+    else {
+        return tsk_fs_attr_run_alloc_no_ext();
+    }
+}
+
+void return_to_the_pool_internal(TSK_FS_ATTR_RUN* run) {
+    for (int i = 0; i < max_element; i++) {
+        TSK_FS_ATTR_RUN* strun = &storage[i];
+        if (strun == run) {
+            taken[i] = 0;
+        }
+    }
+}
+
+/**
+ * \internal
+ * Free a list of data_runs
+ *
+ * @param fs_attr_run Head of list to free
+ * must be called from  ex.. file context only
+ */
+void
+tsk_fs_attr_run_wipe()
+{
+    if (ext_allocator == 1) {
+        if (max_element > 0) {
+            memset(taken, 0, max_element * sizeof(char));
+            last_taken = -1;
+        }
+        ext_allocator = 0;
+    }
+}
+
+
+
+/**
+ * \internal
+ * Free a list of data_runs
+ *
+ * @param fs_attr_run Head of list to free
+ */
+void
+tsk_fs_attr_run_free(TSK_FS_ATTR_RUN* fs_attr_run)
+{
+    if (ext_allocator == 1) {
+        while (fs_attr_run) {
+
+            TSK_FS_ATTR_RUN* fs_attr_run_prev = fs_attr_run;
+            fs_attr_run = fs_attr_run->next;
+            fs_attr_run_prev->next = NULL;
+            return_to_the_pool_internal(fs_attr_run_prev);
+        }
+    }
+    else {
+        return tsk_fs_attr_run_free_no_ext(fs_attr_run);
+    }
+}
+
 
 /**
  * \internal
@@ -43,7 +192,7 @@
  * @returns NULL on error
  */
 TSK_FS_ATTR_RUN *
-tsk_fs_attr_run_alloc()
+tsk_fs_attr_run_alloc_no_ext()
 {
     TSK_FS_ATTR_RUN *fs_attr_run =
         (TSK_FS_ATTR_RUN *) tsk_malloc(sizeof(TSK_FS_ATTR_RUN));
@@ -60,7 +209,7 @@ tsk_fs_attr_run_alloc()
  * @param fs_attr_run Head of list to free
  */
 void
-tsk_fs_attr_run_free(TSK_FS_ATTR_RUN * fs_attr_run)
+tsk_fs_attr_run_free_no_ext(TSK_FS_ATTR_RUN * fs_attr_run)
 {
     while (fs_attr_run) {
         TSK_FS_ATTR_RUN *fs_attr_run_prev = fs_attr_run;
@@ -143,6 +292,33 @@ tsk_fs_attr_free(TSK_FS_ATTR * a_fs_attr)
     free(a_fs_attr);
 }
 
+/**
+ * \internal
+ * Free a single TSK_FS_ATTR structure.  This does not free the linked list.
+ *
+ * @param a_fs_attr Structure to free.
+ */
+void
+tsk_fs_attr_free_vound_allocator(TSK_FS_ATTR* a_fs_attr)
+{
+    if (a_fs_attr == NULL)
+        return;
+
+    if (a_fs_attr->nrd.run)
+        tsk_fs_attr_run_wipe(a_fs_attr->nrd.run);
+    a_fs_attr->nrd.run = NULL;
+
+    free(a_fs_attr->rd.buf);
+    a_fs_attr->rd.buf = NULL;
+
+    free(a_fs_attr->name);
+    a_fs_attr->name = NULL;
+
+    free(a_fs_attr);
+}
+
+
+
 
 /**
  * \internal
@@ -189,9 +365,10 @@ fs_attr_put_name(TSK_FS_ATTR * fs_attr, const char *name)
     }
 
     if (fs_attr->name_size < (strlen(name) + 1)) {
-        fs_attr->name = tsk_realloc(fs_attr->name, strlen(name) + 1);
-        if (fs_attr->name == NULL)
+        char *tmp = tsk_realloc(fs_attr->name, strlen(name) + 1);
+        if (tmp == NULL)
             return 1;
+        fs_attr->name = tmp;
         fs_attr->name_size = strlen(name) + 1;
     }
     strncpy(fs_attr->name, name, fs_attr->name_size);
@@ -234,10 +411,10 @@ tsk_fs_attr_set_str(TSK_FS_FILE * a_fs_file, TSK_FS_ATTR * a_fs_attr,
     }
 
     if (a_fs_attr->rd.buf_size < len) {
-        a_fs_attr->rd.buf =
-            (uint8_t *) tsk_realloc((char *) a_fs_attr->rd.buf, len);
-        if (a_fs_attr->rd.buf == NULL)
+        uint8_t *tmp = (uint8_t *) tsk_realloc((char *) a_fs_attr->rd.buf, len);
+        if (tmp == NULL)
             return 1;
+        a_fs_attr->rd.buf = tmp;
         a_fs_attr->rd.buf_size = len;
     }
 
@@ -724,9 +901,17 @@ tsk_fs_attr_append_run(TSK_FS_INFO * a_fs, TSK_FS_ATTR * a_fs_attr,
         // just in case this was not updated
         if ((a_fs_attr->nrd.run_end == NULL)
             || (a_fs_attr->nrd.run_end->next != NULL)) {
+            
+            int counter = 0;
+            
             data_run_cur = a_fs_attr->nrd.run;
             while (data_run_cur->next) {
                 data_run_cur = data_run_cur->next;
+
+                if (++counter > LOGICAL_MAX_ATTR_RUN) {
+                    break;
+                }
+
             }
             a_fs_attr->nrd.run_end = data_run_cur;
         }
@@ -932,7 +1117,7 @@ tsk_fs_attr_walk_nonres(const TSK_FS_ATTR * fs_attr,
 						cnt = tsk_fs_read_block_decrypt
 						(fs, addr + len_idx, buf, fs->block_size, fs_attr_run->crypto_id + len_idx);
 					}
-                    if (cnt != fs->block_size) {
+                    if (cnt != (ssize_t) fs->block_size) {
                         if (cnt >= 0) {
                             tsk_error_reset();
                             tsk_error_set_errno(TSK_ERR_FS_READ);

@@ -18,6 +18,88 @@
 #include "tsk_ext2fs.h"
 
 
+#ifndef LOGICAL_MAX_ATTR_RUN
+ // redefinition of tsk_logical_fs.h
+#define LOGICAL_MAX_ATTR_RUN 0x7fffffff
+#endif
+
+/**------------------------------------------------------------------ -
+* Vound performance start
+*/
+
+inline TSK_FS_ATTR_RUN* tsk_fs_attr_vound_find_last_run(TSK_FS_INFO* a_fs, TSK_FS_ATTR* a_fs_attr) {
+
+    TSK_FS_ATTR_RUN* data_run_cur = NULL;
+
+    if (a_fs_attr == NULL) {
+        return NULL;
+    }
+
+    if (a_fs_attr->nrd.run == NULL) {
+
+        return NULL;
+
+    }
+
+
+    if ((a_fs_attr->nrd.run_end == NULL)
+        || (a_fs_attr->nrd.run_end->next != NULL)) {
+        int counter = 0;
+
+        data_run_cur = a_fs_attr->nrd.run;
+
+        while (data_run_cur->next) {
+
+            data_run_cur = data_run_cur->next;
+
+            if (++counter > LOGICAL_MAX_ATTR_RUN) {
+                break;
+            }
+        }
+        a_fs_attr->nrd.run_end = data_run_cur;
+    }
+    return data_run_cur;
+}
+
+inline TSK_FS_ATTR_RUN* tsk_fs_attr_vound_data_run_append(TSK_FS_ATTR_RUN* data_run, TSK_FS_ATTR_RUN* to_last_run, TSK_FS_ATTR* a_fs_attr) {
+
+    if ((data_run == NULL) || (a_fs_attr == NULL)) {
+        return data_run;
+    }
+
+    if (a_fs_attr->nrd.run == NULL) {
+        a_fs_attr->nrd.run = data_run;
+        data_run->offset = 0;
+    }
+    else {
+        // just in case this was not updated
+
+        to_last_run->next = data_run;
+        data_run->offset =
+            to_last_run->offset + to_last_run->len;
+    }
+
+    // update the rest of the offsets in the run (if any exist)
+    TSK_FS_ATTR_RUN* data_run_cur = data_run;
+
+    while (data_run_cur->next) {
+        data_run_cur->next->offset =
+            data_run_cur->offset + data_run_cur->len;
+        a_fs_attr->nrd.run_end = data_run_cur->next;
+        data_run_cur = data_run_cur->next;
+    }
+
+    return data_run;
+
+}
+
+
+/**------------------------------------------------------------------ -
+* Vound performance end
+* /
+
+
+
 /*********** MAKE DATA RUNS ***************/
 
 /** \internal
@@ -31,6 +113,8 @@
  *
  * @returns the number of bytes processed and -1 if an error occurred
  */
+
+
 static TSK_OFF_T
 unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
     TSK_DADDR_T * addrs, size_t addr_len, TSK_OFF_T length)
@@ -58,8 +142,11 @@ unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
     run_len = fs_blen;
 
     /* Note that we are lazy about length.  We stop only when a run is past length,
-     * we do not end exactly at length -- although that should happen anyway.  
+     * we do not end exactly at length -- although that should happen anyway. 
      */
+    TSK_FS_ATTR_RUN* last_run =
+        tsk_fs_attr_vound_find_last_run(fs, fs_attr);
+
     for (i = 0; i < addr_len; i++) {
 
         /* Make a new run if:
@@ -85,6 +172,8 @@ unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
                 data_run->flags = TSK_FS_ATTR_RUN_FLAG_SPARSE;
 
             // save the run
+            last_run = tsk_fs_attr_vound_data_run_append(data_run, last_run, fs_attr);
+
             tsk_fs_attr_append_run(fs, fs_attr, data_run);
 
             // get ready for the next run
@@ -222,7 +311,7 @@ unix_make_data_run_indirect(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
     else {
         size_t i;
         retval = 0;
-        for (i = 0; i < addr_cnt && retval != -1; i++) {
+        for (i = 0; i < addr_cnt && retval != -1 && length_remain > 0; i++) {
             retval =
                 unix_make_data_run_indirect(fs, fs_attr, fs_attr_indir,
                 buf, level - 1, myaddrs[i], length_remain);
@@ -254,6 +343,12 @@ tsk_fs_unix_make_data_run(TSK_FS_FILE * fs_file)
     TSK_FS_ATTR *fs_attr;
     TSK_FS_META *fs_meta = fs_file->meta;
     TSK_FS_INFO *fs = fs_file->fs_info;
+
+    size_t fs_bufsize0;
+    size_t fs_bufsize1;
+    size_t ptrsperblock;
+    int numBlocks = 0;
+
 
     // clean up any error messages that are lying around
     tsk_error_reset();
@@ -305,52 +400,54 @@ tsk_fs_unix_make_data_run(TSK_FS_FILE * fs_file)
         return 1;
     }
 
-    read_b =
-        unix_make_data_run_direct(fs, fs_attr,
-        (TSK_DADDR_T *) fs_meta->content_ptr, 12, length);
-    if (read_b == -1) {
-        fs_meta->attr_state = TSK_FS_META_ATTR_ERROR;
-        if (fs_meta->flags & TSK_FS_META_FLAG_UNALLOC)
-            tsk_error_set_errno(TSK_ERR_FS_RECOVER);
-        return 1;
-    }
-    length -= read_b;
+    /* With FFS/UFS a full block contains the addresses, but block_size is
+        * only a fragment.  Figure out the scratch buffer size and the buffers to 
+        * store the cleaned addresses (endian converted) */
+    if (TSK_FS_TYPE_ISFFS(fs->ftype)) {
+        FFS_INFO *ffs = (FFS_INFO *) fs;
 
-    /* if there is still data left, read the indirect */
-    if (length > 0) {
-        int level;
-        char *buf[4] = {NULL};
-        size_t fs_bufsize0;
-        size_t fs_bufsize1;
-        size_t ptrsperblock;
-        int numBlocks = 0;
-        int numSingIndirect = 0;
-        int numDblIndirect = 0;
-        int numTripIndirect = 0;
-        TSK_FS_ATTR *fs_attr_indir;
-
-
-        /* With FFS/UFS a full block contains the addresses, but block_size is
-         * only a fragment.  Figure out the scratch buffer size and the buffers to 
-         * store the cleaned addresses (endian converted) */
-        if (TSK_FS_TYPE_ISFFS(fs->ftype)) {
-            FFS_INFO *ffs = (FFS_INFO *) fs;
-
-            fs_bufsize0 = ffs->ffsbsize_b;
-            if ((fs->ftype == TSK_FS_TYPE_FFS1)
-                || (fs->ftype == TSK_FS_TYPE_FFS1B)) {
-                ptrsperblock = fs_bufsize0 / 4;
-            }
-            else {
-                ptrsperblock = fs_bufsize0 / 8;
-            }
-        }
-        else {
-            fs_bufsize0 = fs->block_size;
+        fs_bufsize0 = ffs->ffsbsize_b;
+        if ((fs->ftype == TSK_FS_TYPE_FFS1)
+            || (fs->ftype == TSK_FS_TYPE_FFS1B)) {
             ptrsperblock = fs_bufsize0 / 4;
         }
-        fs_bufsize1 = sizeof(TSK_DADDR_T) * ptrsperblock;
+        else {
+            ptrsperblock = fs_bufsize0 / 8;
+        }
+    }
+    else {
+        fs_bufsize0 = fs->block_size;
+        ptrsperblock = fs_bufsize0 / 4;
+    }
+    fs_bufsize1 = sizeof(TSK_DADDR_T) * ptrsperblock;
 
+    numBlocks = 12 * ptrsperblock +
+        (int)(((fs_meta->size + fs_bufsize0 - 1) / fs_bufsize0) - 12);
+
+
+        if (tsk_fs_attr_initialize_unix(numBlocks) == 1) {
+            return 1;
+        }
+
+        read_b =
+            unix_make_data_run_direct(fs, fs_attr,
+                (TSK_DADDR_T*)fs_meta->content_ptr, 12, length);
+        if (read_b == -1) {
+            fs_meta->attr_state = TSK_FS_META_ATTR_ERROR;
+            if (fs_meta->flags & TSK_FS_META_FLAG_UNALLOC)
+                tsk_error_set_errno(TSK_ERR_FS_RECOVER);
+            return 1;
+        }
+        length -= read_b;
+
+        /* if there is still data left, read the indirect */
+        if (length > 0) {
+            int level;
+            char* buf[4] = { NULL };
+            int numSingIndirect = 0;
+            int numDblIndirect = 0;
+            int numTripIndirect = 0;
+            TSK_FS_ATTR* fs_attr_indir;
         /*
          * Initialize a buffer for the 3 levels of indirection that are supported by
          * this inode.  Each level of indirection will have a buffer to store
@@ -366,14 +463,12 @@ tsk_fs_unix_make_data_run(TSK_FS_FILE * fs_file)
         }
 
         // determine number of indirect lbocks needed for file size...
-        numBlocks =
-            (int) (((fs_meta->size + fs_bufsize0 - 1) / fs_bufsize0) - 12);
         numSingIndirect =
             (int) ((numBlocks + ptrsperblock - 1) / ptrsperblock);
         numDblIndirect = 0;
         numTripIndirect = 0;
 
-        // double block pointer?
+
         if (numSingIndirect > 1) {
             numDblIndirect = (int)
                 ((numSingIndirect - 1 + ptrsperblock - 1) / ptrsperblock);

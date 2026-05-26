@@ -34,7 +34,7 @@ usage()
                 "\t-z: Time zone of original machine (i.e. EST5EDT or GMT) (only useful with -l)\n");
     tsk_fprintf(stderr,
                 "\t-s seconds: Time skew of original machine (in seconds) (only useful with -l & -m)\n");
-    
+    tsk_fprintf(stderr, "\t-k password: Decryption password for encrypted volumes\n");
 
     exit(1);
 }
@@ -103,7 +103,7 @@ TskGetTimes::filterFs(TSK_FS_INFO * fs_info)
     TSK_TCHAR poolVolName[33];
     if (m_curPoolVol > -1) {
         TSNPRINTF(poolVolName, 32, _TSK_T("poolVol%d/"), m_curPoolVol);
-        TSTRNCAT(volName, poolVolName, 32);
+        TSTRNCAT(volName, poolVolName, 64 - TSTRLEN(volName));
     }
 
     TSK_FS_FLS_FLAG_ENUM fls_flags = (TSK_FS_FLS_FLAG_ENUM)(TSK_FS_FLS_MAC | TSK_FS_FLS_DIR | TSK_FS_FLS_FILE | TSK_FS_FLS_FULL);
@@ -153,6 +153,7 @@ main(int argc, char **argv1)
     TSK_TCHAR *cp;
     int32_t sec_skew = 0;
 	bool do_hash = false;
+    const char* password = "";
 
 #ifdef TSK_WIN32
     // On Windows, get the wide arguments (mingw doesn't support wmain)
@@ -168,15 +169,15 @@ main(int argc, char **argv1)
     progname = argv[0];
     setlocale(LC_ALL, "");
 
-    while ((ch = GETOPT(argc, argv, _TSK_T("b:i:s:mvVz:"))) > 0) {
+    while ((ch = GETOPT(argc, argv, _TSK_T("b:i:k:s:mvVz:"))) > 0) {
         switch (ch) {
         case _TSK_T('?'):
         default:
             TFPRINTF(stderr, _TSK_T("Invalid argument: %" PRIttocTSK "\n"),
                 argv[OPTIND]);
             usage();
+            break;
 
-            
         case _TSK_T('b'):
             ssize = (unsigned int) TSTRTOUL(OPTARG, &cp, 0);
             if (*cp || *cp == *OPTARG || ssize < 1) {
@@ -209,6 +210,10 @@ main(int argc, char **argv1)
 
         case _TSK_T('m'):
             do_hash = true;
+            break;
+
+        case _TSK_T('k'):
+            password = argv1[OPTIND - 1];
             break;
 
         case _TSK_T('v'):
@@ -244,6 +249,7 @@ main(int argc, char **argv1)
     }
 
     TskGetTimes tskGetTimes(sec_skew, do_hash);
+    tskGetTimes.setFileSystemPassword(password);
     if (tskGetTimes.openImage(argc - OPTIND, &argv[OPTIND], imgtype,
             ssize)) {
         tsk_error_print(stderr);

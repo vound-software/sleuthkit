@@ -1,0 +1,8 @@
+﻿  auto_db_java.cpp
+D:\code\b.vound-github\sleuthkit\bindings\java\jni\auto_db_java.h(28,10): error C1083: Cannot open include file: 'jni.h': No such file or directory
+  (compiling source file '../../bindings/java/jni/auto_db_java.cpp')
+  
+  dataModel_SleuthkitJNI.cpp
+D:\code\b.vound-github\sleuthkit\bindings\java\jni\auto_db_java.h(28,10): error C1083: Cannot open include file: 'jni.h': No such file or directory
+  (compiling source file '../../bindings/java/jni/dataModel_SleuthkitJNI.cpp')
+  

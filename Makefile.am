@@ -2,35 +2,17 @@
 EXTRA_DIST = README_win32.txt README.md INSTALL.txt ChangeLog.txt NEWS.txt API-CHANGES.txt \
     licenses/README.md licenses/GNUv2-COPYING licenses/GNUv3-COPYING licenses/IBM-LICENSE \
     licenses/Apache-LICENSE-2.0.txt licenses/cpl1.0.txt licenses/bsd.txt licenses/mit.txt \
-    m4/*.m4 \
     docs/README.txt \
     packages/sleuthkit.spec \
-    win32/BUILDING.txt \
-    win32/*/*.vcxproj \
-    win32/tsk-win.sln \
-    win32/NugetPackages.props \
-    win32/docs/* \
-    bindings/java/README.txt \
-    bindings/java/*.xml \
-    bindings/java/doxygen/Doxyfile \
-    bindings/java/doxygen/*.dox \
-    bindings/java/doxygen/*.html \
-    bindings/java/nbproject/project.xml \
-    bindings/java/src/org/sleuthkit/datamodel/*.java \
-    bindings/java/src/org/sleuthkit/datamodel/*.html \
-    bindings/java/src/org/sleuthkit/datamodel/*.properties \
-    bindings/java/src/org/sleuthkit/datamodel/blackboardutils/*.java \
-    bindings/java/src/org/sleuthkit/datamodel/blackboardutils/attributes/*.java \
-    bindings/java/src/org/sleuthkit/datamodel/Examples/*.java \
-    bindings/java/src/*.html \
-    case-uco/java/*.xml \
-    case-uco/java/*.md \
-    case-uco/java/nbproject/*.xml \
-    case-uco/java/nbproject/*.properties \
-    case-uco/java/src/org/sleuthkit/caseuco/*.java \
-    case-uco/java/test/org/sleuthkit/caseuco/*.java
+    win32 \
+    bindings/java \
+    case-uco/java
 
 ACLOCAL_AMFLAGS = -I m4
+
+# Skip Java submodules during distcheck: they require ivy (network) and a
+# pre-built bindings jar, neither of which is in the distribution tarball.
+AM_DISTCHECK_CONFIGURE_FLAGS = --disable-java
 
 # directories to compile
 if CPPUNIT
@@ -55,7 +37,7 @@ nobase_include_HEADERS = tsk/libtsk.h tsk/tsk_incs.h \
     tsk/vs/tsk_mac.h tsk/vs/tsk_sun.h \
     tsk/fs/tsk_fs.h tsk/fs/tsk_ffs.h tsk/fs/tsk_ext2fs.h tsk/fs/tsk_fatfs.h \
     tsk/fs/tsk_ntfs.h tsk/fs/tsk_iso9660.h tsk/fs/tsk_hfs.h tsk/fs/tsk_yaffs.h tsk/fs/tsk_logical_fs.h \
-    tsk/fs/tsk_apfs.h tsk/fs/tsk_apfs.hpp tsk/fs/apfs_fs.h tsk/fs/apfs_fs.hpp tsk/fs/apfs_compat.hpp \
+    tsk/fs/tsk_apfs.h tsk/fs/tsk_apfs.hpp tsk/fs/apfs_fs.h tsk/fs/apfs_fs.hpp tsk/fs/apfs_compat.hpp tsk/fs/encryptionHelper.h \
     tsk/fs/decmpfs.h tsk/fs/tsk_exfatfs.h tsk/fs/tsk_fatxxfs.h \
     tsk/hashdb/tsk_hashdb.h tsk/auto/tsk_auto.h \
     tsk/auto/tsk_is_image_supported.h tsk/auto/guid.h \
@@ -63,7 +45,11 @@ nobase_include_HEADERS = tsk/libtsk.h tsk/tsk_incs.h \
 	tsk/pool/pool_compat.hpp tsk/pool/apfs_pool_compat.hpp \
     tsk/pool/lvm_pool_compat.hpp \
     tsk/util/crypto.hpp tsk/util/lw_shared_ptr.hpp tsk/util/span.hpp \
-    tsk/util/detect_encryption.h tsk/util/file_system_utils.h
+    tsk/util/detect_encryption.h tsk/util/file_system_utils.h \
+    tsk/util/Bitlocker/BitlockerParser.h tsk/util/Bitlocker/DataTypes.h tsk/util/Bitlocker/MetadataEntry.h \
+    tsk/util/Bitlocker/MetadataUtils.h tsk/util/Bitlocker/MetadataValue.h tsk/util/Bitlocker/MetadataValueAesCcmEncryptedKey.h \
+    tsk/util/Bitlocker/MetadataValueKey.h tsk/util/Bitlocker/MetadataValueOffsetAndSize.h tsk/util/Bitlocker/MetadataValueUnicode.h \
+    tsk/util/Bitlocker/MetadataValueStretchKey.h tsk/util/Bitlocker/MetadataValueVolumeMasterKey.h tsk/util/Bitlocker/BitlockerUtils.h
 
 nobase_dist_data_DATA = tsk/sorter/default.sort tsk/sorter/freebsd.sort \
     tsk/sorter/images.sort tsk/sorter/linux.sort tsk/sorter/openbsd.sort \

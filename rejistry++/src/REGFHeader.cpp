@@ -25,6 +25,8 @@
  * \file REGFHeader.cpp
   */
 
+#include <memory>
+
 // Local includes
 #include "REGFHeader.h"
 #include "RejistryException.h"
@@ -33,7 +35,8 @@ namespace Rejistry {
 
 
     REGFHeader::REGFHeader(RegistryByteBuffer& buf, const uint32_t offset) : BinaryBlock(buf, offset) {
-        uint64_t magic = getDWord(offset);
+        // offset is applied within getDWord by BinaryBlock
+        uint64_t magic = getDWord(0x0);
 
         if (magic != 0x66676572) {
             throw RegistryParseException("REGF magic value not found");
@@ -71,8 +74,12 @@ namespace Rejistry {
             }
 
             HBIN * nextHBIN = new HBIN(this, _buf, getAbsoluteOffset(nextHBINOffset));
+            uint32_t relNext = nextHBIN->getRelativeOffsetNextHBIN();
             hbinList.push_back(nextHBIN);
-            nextHBINOffset += nextHBIN->getRelativeOffsetNextHBIN();
+            if (relNext == 0 || nextHBINOffset + relNext < nextHBINOffset) {
+                break;
+            }
+            nextHBINOffset += relNext;
         }
         while (nextHBINOffset <= getLastHbinOffset());
 
@@ -92,9 +99,9 @@ namespace Rejistry {
      */
     NKRecord::NKRecordPtr REGFHeader::getRootNKRecord() const {
         int32_t firstCellOffset = (int32_t)(getDWord(FIRST_KEY_OFFSET_OFFSET));
-        std::auto_ptr< HBIN > firstHBIN(getFirstHBIN());
+        std::unique_ptr< HBIN > firstHBIN(getFirstHBIN());
         if (firstHBIN.get() != NULL) {
-            std::auto_ptr< Cell > cellPtr(firstHBIN->getCellAtOffset(firstCellOffset));
+            std::unique_ptr< Cell > cellPtr(firstHBIN->getCellAtOffset(firstCellOffset));
 
             if (cellPtr.get() == NULL) {
                 throw RegistryParseException("Failed to get first cell.");

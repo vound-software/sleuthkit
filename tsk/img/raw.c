@@ -42,7 +42,7 @@
 
 
 
-/** 
+/**
  * \internal
  * Read from one of the multiple files in a split set of disk images.
  *
@@ -198,7 +198,7 @@ raw_read_segment(IMG_RAW_INFO * raw_info, int idx, char *buf,
         // ReadFile returns TRUE and sets nread to zero.
         // We need to check if we've reached the end of a file and set nread to
         // the number of bytes read.
-        if ((raw_info->is_winobj) && (nread == 0) && (offset_to_read + len_to_read == raw_info->img_info.size)) {
+        if ((raw_info->is_winobj) && (nread == 0) && (offset_to_read + (TSK_OFF_T)len_to_read == raw_info->img_info.size)) {
             nread = (DWORD)len_to_read;
         }
         cnt = (ssize_t) nread;
@@ -215,7 +215,7 @@ raw_read_segment(IMG_RAW_INFO * raw_info, int idx, char *buf,
                 tsk_error_set_errno(TSK_ERR_IMG_WRITE);
                 tsk_error_set_errstr("raw_read: file \"%" PRIttocTSK
                     "\" offset: %" PRIdOFF " tsk_img_writer_add cnt: %" PRIuSIZE " - %d",
-                    raw_info->img_info.images[idx], offset_to_read, cnt
+                    raw_info->img_info.images[idx], offset_to_read, cnt, (int) result
                     );
                 return -1;
             }
@@ -227,10 +227,14 @@ raw_read_segment(IMG_RAW_INFO * raw_info, int idx, char *buf,
         // If we had to do the sector alignment, copy the result into the original buffer and fix
         // the number of bytes read
         if (sector_aligned_buf != NULL) {
-            memcpy(buf, sector_aligned_buf + rel_offset % raw_info->img_info.sector_size, len);
-            cnt = cnt - rel_offset % raw_info->img_info.sector_size;
-            if (cnt < 0) {
-                cnt = -1;
+            ssize_t align_offset = (ssize_t)(rel_offset % raw_info->img_info.sector_size);
+            if (cnt > align_offset) {
+                cnt -= align_offset;
+                if ((size_t)cnt > len)
+                    cnt = (ssize_t)len;
+                memcpy(buf, sector_aligned_buf + align_offset, (size_t)cnt);
+            } else {
+                cnt = 0;
             }
             free(sector_aligned_buf);
         }
@@ -264,7 +268,7 @@ raw_read_segment(IMG_RAW_INFO * raw_info, int idx, char *buf,
 }
 
 
-/** 
+/**
  * \internal
  * Read data from a (potentially split) raw disk image.  The offset to
  * start reading from is equal to the volume offset plus the read offset.
@@ -346,7 +350,7 @@ raw_read(TSK_IMG_INFO * img_info, TSK_OFF_T offset, char *buf, size_t len)
                 /* go to the next image segment */
                 while ((len > 0) && (i+1 < raw_info->img_info.num_img)) {
                     ssize_t cnt2;
-                    
+
                     i++;
 
                     if ((raw_info->max_off[i] - raw_info->max_off[i - 1]) >= (TSK_OFF_T)len)
@@ -387,7 +391,7 @@ raw_read(TSK_IMG_INFO * img_info, TSK_OFF_T offset, char *buf, size_t len)
 }
 
 
-/** 
+/**
  * \internal
  * Display information about the disk image set.
  *
@@ -420,12 +424,10 @@ raw_imgstat(TSK_IMG_INFO * img_info, FILE * hFile)
                 (TSK_OFF_T) (raw_info->max_off[i] - 1));
         }
     }
-
-    return;
 }
 
 
-/** 
+/**
  * \internal
  * Free the memory and close the file  handles for the disk image
  *
@@ -463,6 +465,250 @@ raw_close(TSK_IMG_INFO * img_info)
     tsk_img_free(raw_info);
 }
 
+
+/*
+VOUND modification
+
+*/
+TSK_OFF_T checkDeviceFile(TSK_TCHAR* file) {
+    TSK_OFF_T size = -1;
+
+    int nameLen = strlen(file);
+
+
+    if (nameLen > 0 && (file[nameLen - 1] == L"\\")) {
+        file[nameLen - 1] == L"\0";
+    }
+
+
+    SetErrorMode(SEM_NOOPENFILEERRORBOX);
+
+    HANDLE hnd = CreateFile(
+        file,
+        GENERIC_READ,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL);
+
+    if (hnd == INVALID_HANDLE_VALUE) {
+        DWORD err = GetLastError();
+        return -1;
+    }
+
+    DISK_GEOMETRY driveInfo;
+    PARTITION_INFORMATION diskInfo;
+    DWORD dwResult;
+    BOOL bResult;
+
+    dwResult = 0;
+
+    bResult = DeviceIoControl(
+        hnd,
+        IOCTL_DISK_GET_DRIVE_GEOMETRY,
+        NULL,
+        0,
+        &driveInfo,
+        sizeof(driveInfo),
+        &dwResult,
+        NULL);
+
+    if (!bResult) {
+        return -1;
+    }
+
+    CloseHandle(hnd);
+
+    ULONGLONG last_sector = driveInfo.Cylinders.QuadPart * driveInfo.TracksPerCylinder * driveInfo.SectorsPerTrack;
+    ULONGLONG total_sectors = last_sector + 1;
+
+    return total_sectors * driveInfo.BytesPerSector;
+}
+
+/**
+ * Get the size in bytes of the given file.
+ *
+ * @param a_file The file to test
+ * @param is_winobj 1 if the file is a windows object and not a real file
+ *
+ * @return the size in bytes, or -1 on error/unknown,
+ *         -2 if unreadable, -3 if it's a directory.
+ */
+static TSK_OFF_T
+get_size(const TSK_TCHAR* a_file, uint8_t a_is_winobj)
+{
+    TSK_OFF_T size = -1;
+    struct STAT_STR sb;
+
+    if (TSTAT(a_file, &sb) < 0) {
+        if (a_is_winobj) {
+            /* stat can fail for Windows objects; ignore that */
+            if (tsk_verbose) {
+                tsk_fprintf(stderr,
+                    "raw_open: ignoring stat result on Windows device %"
+                    PRIttocTSK "\n", a_file);
+            }
+        }
+        else {
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_STAT);
+            tsk_error_set_errstr("raw_open: image \"%" PRIttocTSK
+                "\" - %s", a_file, strerror(errno));
+            return -2;
+        }
+    }
+    else if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+        if (a_is_winobj) {
+            // checking whether we talk to windows device 
+            if (a_is_winobj) {
+#ifdef TSK_WIN32
+                size = checkDeviceFile(a_file);
+                if (size > 0) {
+                    return size;
+                }
+#else       
+                return -3;
+
+#endif            
+            }
+        }
+        else {
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_MAGIC);
+            tsk_error_set_errstr("raw_open: image \"%" PRIttocTSK
+                "\" - is a directory", a_file);
+            return -3;
+        }
+    }
+
+#ifdef TSK_WIN32
+    {
+        HANDLE fd;
+        DWORD dwHi, dwLo;
+
+        if ((fd = CreateFile(a_file, FILE_READ_DATA,
+            FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+            OPEN_EXISTING, 0, NULL)) ==
+            INVALID_HANDLE_VALUE) {
+            int lastError = (int)GetLastError();
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+            // print string of commonly found errors
+            if (lastError == ERROR_ACCESS_DENIED) {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - access denied", a_file);
+            }
+            else if (lastError == ERROR_SHARING_VIOLATION) {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - sharing violation", a_file);
+            }
+            else if (lastError == ERROR_FILE_NOT_FOUND) {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - file not found", a_file);
+            }
+            else {
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - (error %d)", a_file, lastError);
+            }
+            return -2;
+        }
+
+        /* We need different techniques to determine the size of Windows physical
+         * devices versus normal files */
+        if (a_is_winobj == 0) {
+            dwLo = GetFileSize(fd, &dwHi);
+            if (dwLo == 0xffffffff) {
+                int lastError = (int)GetLastError();
+                tsk_error_reset();
+                tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+                tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                    "\" - GetFileSize: %d", a_file, lastError);
+                size = -1;
+            }
+            else {
+                size = dwLo | ((TSK_OFF_T)dwHi << 32);
+            }
+        }
+        else {
+
+            //use GET_PARTITION_INFO_EX prior to IOCTL_DISK_GET_DRIVE_GEOMETRY
+            // to determine the physical disk size because
+            //calculating it with the help of GET_DRIVE_GEOMETRY gives only
+            // approximate number
+            DWORD junk;
+
+            PARTITION_INFORMATION_EX partition;
+            if (FALSE == DeviceIoControl(fd,
+                IOCTL_DISK_GET_PARTITION_INFO_EX,
+                NULL, 0, &partition, sizeof(partition), &junk,
+                (LPOVERLAPPED)NULL)) {
+                DISK_GEOMETRY pdg;
+
+                if (FALSE == DeviceIoControl(fd, IOCTL_DISK_GET_DRIVE_GEOMETRY,
+                    NULL, 0, &pdg, sizeof(pdg), &junk, (LPOVERLAPPED)NULL)) {
+                    int lastError = (int)GetLastError();
+                    tsk_error_reset();
+                    tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+                    tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK
+                        "\" - DeviceIoControl: %d", a_file,
+                        lastError);
+                    size = -1;
+                }
+                else {
+                    size = pdg.Cylinders.QuadPart *
+                        (TSK_OFF_T)pdg.TracksPerCylinder *
+                        (TSK_OFF_T)pdg.SectorsPerTrack *
+                        (TSK_OFF_T)pdg.BytesPerSector;
+                }
+            }
+            else {
+                size = partition.PartitionLength.QuadPart;
+            }
+        }
+
+        CloseHandle(fd);
+    }
+#else
+
+    int fd;
+
+    if ((fd = open(a_file, O_RDONLY | O_BINARY)) < 0) {
+        tsk_error_reset();
+        tsk_error_set_errno(TSK_ERR_IMG_OPEN);
+        tsk_error_set_errstr("raw_open: file \"%" PRIttocTSK "\" - %s",
+            a_file, strerror(errno));
+        return -2;
+    }
+
+#ifdef __APPLE__
+    /* OS X doesn't support SEEK_END on char devices */
+    if ((sb.st_mode & S_IFMT) != S_IFCHR) {
+        size = lseek(fd, 0, SEEK_END);
+    }
+
+    if (size <= 0) {
+        int blkSize;
+        long long blkCnt;
+
+        if (ioctl(fd, DKIOCGETBLOCKSIZE, &blkSize) >= 0) {
+            if (ioctl(fd, DKIOCGETBLOCKCOUNT, &blkCnt) >= 0) {
+                size = blkCnt * (long long)blkSize;
+            }
+        }
+    }
+#else
+    /* We don't use the stat output because it doesn't work on raw
+     * devices and such */
+    size = lseek(fd, 0, SEEK_END);
+#endif
+
+    close(fd);
+
+#endif
+
+    return size;
+}
 
 
 
@@ -540,7 +786,7 @@ set_device_sector_size(IMG_RAW_INFO * raw_info, const TSK_TCHAR * image_name, TS
     }
 
     // If reading a sector starting at offset 1 failed, the assumption is that we have a device
-    // that requires reads to be sector-aligned. 
+    // that requires reads to be sector-aligned.
     if (needs_sector_alignment) {
         // Start at the minimum (512) and double up to max_sector_size (4096)
         unsigned int sector_size = min_sector_size;
@@ -580,7 +826,7 @@ set_device_sector_size(IMG_RAW_INFO * raw_info, const TSK_TCHAR * image_name, TS
 }
 #endif
 
-/** 
+/**
  * \internal
  * Open the set of disk images as a set of split raw images
  *
@@ -760,6 +1006,19 @@ raw_open(int a_num_img, const TSK_TCHAR * const a_images[],
         }
 
         /* add the size of this image to the total and save the current max */
+        if (size > INT64_MAX - img_info->size) {
+            tsk_error_reset();
+            tsk_error_set_errno(TSK_ERR_IMG_ARG);
+            tsk_error_set_errstr("raw_open: image size overflow");
+            free(raw_info->max_off);
+            free(raw_info->cptr);
+            for (i = 0; i < raw_info->img_info.num_img; i++) {
+                free(raw_info->img_info.images[i]);
+            }
+            free(raw_info->img_info.images);
+            tsk_img_free(raw_info);
+            return NULL;
+        }
         img_info->size += size;
         raw_info->max_off[i] = img_info->size;
 
@@ -799,3 +1058,5 @@ tsk_img_free(void *a_ptr)
     imgInfo->tag = 0;
     free(imgInfo);
 }
+
+

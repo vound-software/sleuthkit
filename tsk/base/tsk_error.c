@@ -20,9 +20,11 @@
 char *progname = "unknown";
 int tsk_verbose = 0;
 
+/* Optional error listener */
+TSK_ERROR_LISTENER_CB error_listener = NULL;
 
 /* Error messages */
-static const char *tsk_err_aux_str[TSK_ERR_IMG_MAX] = {
+static const char *tsk_err_aux_str[TSK_ERR_AUX_MAX] = {
     "Insufficient memory",
     "TSK Error"
 };
@@ -81,6 +83,8 @@ static const char *tsk_err_fs_str[TSK_ERR_FS_MAX] = {
     "Encryption detected",
     "Possible encryption detected",
     "Multiple file system types detected",   // 20
+    "BitLocker initialization failed",
+    "Error loading large directory",
 };
 
 static const char *tsk_err_hdb_str[TSK_ERR_HDB_MAX] = {
@@ -128,6 +132,10 @@ tsk_error_get_info()
 static pthread_key_t pt_tls_key;
 static pthread_once_t pt_tls_key_once = PTHREAD_ONCE_INIT;
 
+/* Fallback used only when per-thread allocation fails under OOM conditions.
+ * Not thread-safe, but prevents a crash when error reporting is best-effort. */
+static TSK_ERROR_INFO tsk_error_fallback_info = { 0, {0}, {0}, {0} };
+
 static void
 free_error_info(void *per_thread_error_info)
 {
@@ -149,16 +157,20 @@ tsk_error_get_info()
     TSK_ERROR_INFO *ptr = NULL;
     (void) pthread_once(&pt_tls_key_once, make_pt_tls_key);
     if ((ptr = (TSK_ERROR_INFO *) pthread_getspecific(pt_tls_key)) == 0) {
-        // Under high memory pressure malloc will return NULL.
         ptr = (TSK_ERROR_INFO *) malloc(sizeof(TSK_ERROR_INFO));
 
-        if( ptr != NULL ) {
+        if (ptr != NULL) {
             ptr->t_errno = 0;
             ptr->errstr[0] = 0;
             ptr->errstr2[0] = 0;
+            ptr->errstr_print[0] = 0;
         }
         (void) pthread_setspecific(pt_tls_key, ptr);
     }
+    /* Return fallback struct instead of NULL to prevent callers from crashing
+     * under OOM conditions. */
+    if (ptr == NULL)
+        return &tsk_error_fallback_info;
     return ptr;
 }
 #endif
@@ -175,6 +187,90 @@ tsk_error_get_info()
 }
 
 #endif
+
+
+/**
+ * \ingroup baselib
+ * Return the Structured current error message
+ *
+ * @returns String with error message or NULL if there is no error
+ */
+
+const char*
+tsk_error_get_vound()
+{
+    size_t pidx = 0;
+    TSK_ERROR_INFO* error_info = tsk_error_get_info();
+    int t_errno = error_info->t_errno;
+    char* errstr_print = error_info->errstr_print;
+
+    if (t_errno == 0) {
+        return NULL;
+    }
+
+    memset(errstr_print, 0, TSK_ERROR_STRING_MAX_LENGTH);
+
+    if (t_errno & TSK_ERR_AUX) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_AUX_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUX:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_aux_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUX:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_IMG) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_IMG_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "IMG:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_img_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "IMG:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_VS) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_VS_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "VS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_mm_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "VS:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_FS) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_FS_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "FS:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_fs_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "FS:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_HDB) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_HDB_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "HDB:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_hdb_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "HDB:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_AUTO) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_AUTO_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUTO:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_auto_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "AUTO:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else if (t_errno & TSK_ERR_POOL) {
+        if ((TSK_ERR_MASK & t_errno) < TSK_ERR_POOL_MAX)
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "POOL:%u:%s", t_errno & TSK_ERR_MASK, tsk_err_pool_str[t_errno & TSK_ERR_MASK]);
+        else
+            snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "POOL:%u:%s", t_errno & TSK_ERR_MASK, "unknown error");
+    }
+    else {
+        snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx, "UNKNOWN:%u:%s", t_errno, "unknown error");
+    }
+    pidx = strlen(errstr_print);
+
+    /* Print the unique string, if it exists */
+    if (error_info->errstr[0] != '\0') {
+        snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx,
+            " (%s)", error_info->errstr);
+        pidx = strlen(errstr_print);
+    }
+
+    if (error_info->errstr2[0] != '\0') {
+        snprintf(&errstr_print[pidx], TSK_ERROR_STRING_MAX_LENGTH - pidx,
+            " (%s)", error_info->errstr2);
+        pidx = strlen(errstr_print);
+    }
+    return (char*)error_info->errstr_print;
+}
 
 /**
  * \ingroup baselib
@@ -335,6 +431,9 @@ tsk_error_set_errstr(const char *format, ...)
     vsnprintf(tsk_error_get_info()->errstr, TSK_ERROR_STRING_MAX_LENGTH,
         format, args);
     va_end(args);
+    if (error_listener != NULL) {
+        error_listener((uint32_t)tsk_error_get_info()->t_errno, tsk_error_get_info()->errstr);
+    }
 }
 
 /**
@@ -348,6 +447,9 @@ tsk_error_vset_errstr(const char *format, va_list args)
 {
     vsnprintf(tsk_error_get_info()->errstr, TSK_ERROR_STRING_MAX_LENGTH,
         format, args);
+    if (error_listener != NULL) {
+        error_listener((uint32_t)tsk_error_get_info()->t_errno, tsk_error_get_info()->errstr);
+    }
 }
 
 /**
@@ -400,15 +502,38 @@ void
 tsk_error_errstr2_concat(const char *format, ...)
 {
     char *errstr2 = tsk_error_get_info()->errstr2;
-    int current_length = (int) (strlen(errstr2) + 1);   // +1 for a space
-    if (current_length > 0) {
-        va_list args;
-        int remaining = TSK_ERROR_STRING_MAX_LENGTH - current_length;
-        errstr2[current_length - 1] = ' ';
-        va_start(args, format);
-        vsnprintf(&errstr2[current_length], remaining, format, args);
-        va_end(args);
+    size_t current_length = strlen(errstr2);
+    size_t offset = current_length;
+    int remaining;
+    va_list args;
+
+    /* Only add a space separator when appending to a non-empty string */
+    if (current_length > 0 && current_length < TSK_ERROR_STRING_MAX_LENGTH) {
+        errstr2[current_length] = ' ';
+        offset = current_length + 1;
     }
+
+    remaining = TSK_ERROR_STRING_MAX_LENGTH - (int) offset;
+    if (remaining <= 0)
+        return;
+
+    va_start(args, format);
+    vsnprintf(&errstr2[offset], remaining, format, args);
+    va_end(args);
+}
+
+/**
+* Add a method that will be sent most errors (in additional to the processing TSK already does).
+* 
+* This is a bit limited since adding an error is a multistep process. The listener is invoked when
+* tsk_error_set_errstr() is called. Our convention is that tsk_error_set_errno() is called first so
+* the errno should be accurate. We would miss anything set to errstr2 but this is not very common.
+* 
+* @param listener   Method that should take arguments (uint32_t, const char*)
+*/
+void
+tsk_error_set_error_listener(TSK_ERROR_LISTENER_CB listener) {
+    error_listener = listener;
 }
 
 /**

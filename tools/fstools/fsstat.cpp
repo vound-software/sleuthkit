@@ -86,6 +86,7 @@ main(int argc, char **argv1)
             TFPRINTF(stderr, _TSK_T("Invalid argument: %" PRIttocTSK "\n"),
                 argv[OPTIND]);
             usage();
+            break;
         case _TSK_T('b'):
             ssize = (unsigned int) TSTRTOUL(OPTARG, &cp, 0);
             if (*cp || *cp == *OPTARG || ssize < 1) {
@@ -170,12 +171,6 @@ main(int argc, char **argv1)
     /* We need at least one more argument */
     if (OPTIND >= argc) {
         tsk_fprintf(stderr, "Missing image name\n");
-        usage();
-    }
-
-    /* Passwords only work if the file system type has been specified */
-    if (strlen(password) > 0 && fstype == TSK_FS_TYPE_DETECT) {
-        tsk_fprintf(stderr, "File system type must be specified to use a password\n");
         usage();
     }
 

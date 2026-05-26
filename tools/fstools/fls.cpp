@@ -125,6 +125,7 @@ main(int argc, char **argv1)
             TFPRINTF(stderr, _TSK_T("Invalid argument: %" PRIttocTSK "\n"),
                 argv[OPTIND]);
             usage();
+            break;
         case _TSK_T('a'):
             fls_flags |= TSK_FS_FLS_DOT;
             break;
@@ -256,13 +257,6 @@ main(int argc, char **argv1)
         tsk_fprintf(stderr, "Missing image name\n");
         usage();
     }
-
-    /* Passwords only work if the file system type has been specified */
-    if (strlen(password) > 0 && fstype == TSK_FS_TYPE_DETECT) {
-        tsk_fprintf(stderr, "File system type must be specified to use a password\n");
-        usage();
-    }
-
 
     /* Set the full flag to print the full path name if recursion is
      ** set and we are only displaying files or deleted files

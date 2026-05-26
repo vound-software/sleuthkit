@@ -31,6 +31,10 @@
 #define TZNAME __tzname
 #endif
 
+
+#include <tsk/fs/tsk_iso9660.h>
+
+
 char tsk_fs_name_type_str[TSK_FS_NAME_TYPE_STR_MAX][2] =
     { "-", "p", "c", "d", "b", "r",
     "l", "s", "h", "w", "v", "V"
@@ -88,12 +92,14 @@ tsk_fs_name_realloc(TSK_FS_NAME * fs_name, size_t namelen)
     if (fs_name->name_size >= namelen)
         return 0;
 
-    fs_name->name = (char *) tsk_realloc(fs_name->name, namelen + 1);
-    if (fs_name->name == NULL) {
+
+    char *tmp = (char *) tsk_realloc(fs_name->name, namelen + 1);
+    if (tmp == NULL) {
         fs_name->name_size = 0;
         return 1;
     }
 
+    fs_name->name = tmp;
     fs_name->type = TSK_FS_NAME_TYPE_UNDEF;
     fs_name->name_size = namelen;
 
@@ -186,11 +192,11 @@ tsk_fs_name_copy(TSK_FS_NAME * a_fs_name_to,
             a_fs_name_to->shrt_name_size) {
             a_fs_name_to->shrt_name_size =
                 strlen(a_fs_name_from->shrt_name) + 16;
-            a_fs_name_to->shrt_name =
-                (char *) tsk_realloc(a_fs_name_to->shrt_name,
+            char *tmp = (char *) tsk_realloc(a_fs_name_to->shrt_name,
                 a_fs_name_to->shrt_name_size);
-            if (a_fs_name_to->shrt_name == NULL)
+            if (tmp == NULL)
                 return 1;
+            a_fs_name_to->shrt_name = tmp;
         }
         strncpy(a_fs_name_to->shrt_name, a_fs_name_from->shrt_name,
             a_fs_name_to->shrt_name_size);
@@ -475,8 +481,6 @@ tsk_fs_name_print(FILE * hFile, const TSK_FS_FILE * fs_file,
             tsk_print_sanitized(hFile, fs_attr->name);
         }
     }
-
-    return;
 }
 
 /**
@@ -547,12 +551,7 @@ tsk_fs_name_print_long(FILE * hFile, const TSK_FS_FILE * fs_file,
         tsk_fprintf(hFile, "\t%" PRIuGID "\t%" PRIuUID,
             fs_file->meta->gid, fs_file->meta->uid);
     }
-
-    return;
 }
-
-
-
 
 /**
  * \internal
@@ -766,4 +765,33 @@ tsk_fs_name_print_mac_md5(FILE * hFile, const TSK_FS_FILE * fs_file,
                 tsk_fprintf(hFile, "%" PRIu32, fs_file->meta->crtime);
         }
     }
+}
+
+
+size_t tsk_fs_fs_id_read(TSK_FS_INFO* fs_info, char* buffer, size_t len) {
+    size_t i = 0;
+    size_t real_used = fs_info->fs_id_used > len - 1 ? len - 1 : fs_info->fs_id_used; // need space for last \0
+
+    memset(buffer, 0, len);
+
+    if (fs_info->ftype == TSK_FS_TYPE_ISO9660) {
+        ISO_INFO* iso = fs_info;
+
+        if (iso->svd) {
+            for (i = 0; i < real_used && i < TSK_FS_INFO_FS_ID_LEN; i++) {
+
+                buffer[i] = iso->svd->svd.vol_id[i];
+
+            }
+            return i;
+        }
+    }
+
+    for (i = 0; (i < fs_info->fs_name) && (i < 16); i++) {
+        if (fs_info->fs_name[i] == 0) {
+            break;
+        }
+        buffer[i] = fs_info->fs_name[i];
+    }
+    return i;
 }

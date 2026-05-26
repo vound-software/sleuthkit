@@ -69,6 +69,12 @@ const TSK_POOL_INFO *tsk_pool_open(int num_vols,
   for (auto i = 0; i < num_vols; i++) {
     const auto &part = parts[i];
 
+    if (part == nullptr) {
+      tsk_error_set_errno(TSK_ERR_POOL_ARG);
+      tsk_error_set_errstr("tsk_pool_open: Null part handle at index %d", i);
+      return nullptr;
+    }
+
     if ((part->vs == nullptr) || (part->vs->tag != TSK_VS_INFO_TAG)) {
       tsk_error_set_errno(TSK_ERR_POOL_ARG);
       tsk_error_set_errstr("tsk_pool_open: Null vs handle");
@@ -104,20 +110,27 @@ const TSK_POOL_INFO *tsk_pool_open_img(int num_imgs, TSK_IMG_INFO *const imgs[],
                                        const TSK_OFF_T offsets[],
                                        TSK_POOL_TYPE_ENUM type) {
   std::vector<APFSPool::img_t> apfs_v{};
-  apfs_v.reserve(num_imgs);
-
-  for (auto i = 0; i < num_imgs; i++) {
-    apfs_v.emplace_back(imgs[i], offsets[i]);
-  }
 #ifdef HAVE_LIBVSLVM
   std::vector<LVMPool::img_t> lvm_v{};
-
-  lvm_v.reserve(num_imgs);
-
-  for (auto i = 0; i < num_imgs; i++) {
-    lvm_v.emplace_back(imgs[i], offsets[i]);
-  }
 #endif
+
+  try {
+    apfs_v.reserve(num_imgs);
+    for (auto i = 0; i < num_imgs; i++) {
+      apfs_v.emplace_back(imgs[i], offsets[i]);
+    }
+#ifdef HAVE_LIBVSLVM
+    lvm_v.reserve(num_imgs);
+    for (auto i = 0; i < num_imgs; i++) {
+      lvm_v.emplace_back(imgs[i], offsets[i]);
+    }
+#endif
+  } catch (const std::bad_alloc &) {
+    tsk_error_reset();
+    tsk_error_set_errno(TSK_ERR_POOL_ARG);
+    tsk_error_set_errstr("tsk_pool_open_img: out of memory");
+    return nullptr;
+  }
 
   const char *error_string = NULL;
 
@@ -185,6 +198,7 @@ const TSK_POOL_INFO *tsk_pool_open_img(int num_imgs, TSK_IMG_INFO *const imgs[],
   return nullptr;
 }
 
+
 void tsk_pool_close(const TSK_POOL_INFO *pool) {
   // sanity checks
   if ((pool == nullptr) || (pool->tag != TSK_POOL_INFO_TAG)) return;
@@ -192,3 +206,26 @@ void tsk_pool_close(const TSK_POOL_INFO *pool) {
   // each pool container is supposed to free the struct
   pool->close(pool);
 }
+
+
+
+//VOUND-- start
+
+TSK_IMG_INFO* getPoolImageInfoSing(TSK_IMG_INFO* const img,
+    const TSK_OFF_T offset,
+    TSK_POOL_TYPE_ENUM type) {
+
+
+    std::vector<APFSPool::img_t> v{};
+    v.reserve(1);
+    v.emplace_back(img, offset);
+
+
+    auto apfs = new APFSPoolCompat(std::move(v), APFS_POOL_NX_BLOCK_LATEST);
+
+    TSK_POOL_INFO  pInfo = apfs->pool_info();
+
+    return apfs->getImageInfo(&pInfo, offset);
+}
+
+//Vound -- End

@@ -14,8 +14,6 @@
 
 #if HAVE_LIBAFFLIB
 
-typedef int bool;
-
 #include "aff.h"
 
 /* Note: The routine -assumes- we are under a lock on &(img_info->cache_lock)) */
@@ -112,7 +110,7 @@ aff_imgstat(TSK_IMG_INFO * img_info, FILE * hFile)
     if (af_get_seg(aff_info->af_file, AF_MD5, NULL, buf, &buf_len) == 0) {
         int i;
         for (i = 0; i < 16; i++) {
-            tsk_fprintf(hFile, "%x", buf[i]);
+            tsk_fprintf(hFile, "%02x", buf[i]);
         }
         tsk_fprintf(hFile, "\n");
     }
@@ -125,7 +123,7 @@ aff_imgstat(TSK_IMG_INFO * img_info, FILE * hFile)
     if (af_get_seg(aff_info->af_file, AF_SHA1, NULL, buf, &buf_len) == 0) {
         int i;
         for (i = 0; i < 20; i++) {
-            tsk_fprintf(hFile, "%x", buf[i]);
+            tsk_fprintf(hFile, "%02x", buf[i]);
         }
         tsk_fprintf(hFile, "\n");
     }

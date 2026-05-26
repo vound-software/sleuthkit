@@ -1,0 +1,2 @@
+﻿  istat.cpp
+LINK : fatal error LNK1181: cannot open input file 'libvhdi.lib'

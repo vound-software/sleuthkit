@@ -76,7 +76,7 @@ fatxxfs_fsstat(TSK_FS_INFO * fs, FILE * hFile)
     /* Read the root directory sector so that we can get the volume
      * label from it */
     cnt = tsk_fs_read_block(fs, fatfs->rootsect, data_buf, fs->block_size);
-    if (cnt != fs->block_size) {
+    if (cnt != (ssize_t) fs->block_size) {
         if (cnt >= 0) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_READ);
@@ -781,6 +781,15 @@ fatxxfs_open(FATFS_INFO *fatfs)
             fs->fs_id[fs->fs_id_used] =
                 fatsb->a.f16.vol_id[fs->fs_id_used];
     }
+
+    // Vound provide file system level label
+    for (int i = 0; i < 11; i++) {
+        if (fatfs->fs_info.ftype == TSK_FS_TYPE_FAT32)
+            fs->fs_name[i] = fatsb->a.f32.vol_lab[i];
+        else
+            fs->fs_name[i] = fatsb->a.f16.vol_lab[i];
+    }
+
 
     /*
      * Set the function pointers  

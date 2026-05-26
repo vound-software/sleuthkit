@@ -26,6 +26,7 @@
  *
  */
 #include<algorithm>
+#include <memory>
 
 // Local includes
 #include "DBIndirectRecord.h"
@@ -44,14 +45,16 @@ namespace Rejistry {
             uint32_t size = std::min(DB_DATA_SIZE, length);
             uint32_t offset = getDWord(OFFSET_LIST_OFFSET + (count * 4));
             offset += REGFHeader::FIRST_HBIN_OFFSET;
-            std::auto_ptr< Cell > c(new Cell(_buf, offset));
+            std::unique_ptr< Cell > c(new Cell(_buf, offset));
 
             if (c.get() == NULL) {
                 throw RegistryParseException("Failed to create Cell.");
             }
 
             std::vector<uint8_t> cellData = c->getData();
-            
+            if (cellData.size() < size) {
+                throw RegistryParseException("DB indirect cell too small for requested data.");
+            }
             data.insert(data.end(), cellData.begin(), cellData.begin() + size);
 
             length -= size;
