@@ -1,3 +1,0 @@
-﻿  tsk_gettimes.cpp
-  .NETFramework,Version=v4.7.2.AssemblyAttributes.cpp
-LINK : fatal error LNK1181: cannot open input file 'libvhdi.lib'
