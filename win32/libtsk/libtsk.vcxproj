@@ -196,7 +196,7 @@
     <TargetName>$(ProjectName)-x64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-exp|x64'">
-    <TargetName>$(ProjectName)-libewf-experimantal-x64</TargetName>
+    <TargetName>$(ProjectName)-libewf-experimental-x64</TargetName>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\NugetPackages.props" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -363,7 +363,7 @@ xcopy /E /Y "$(VCInstallDir)\redist\MSVC\$(VCToolsRedistVersion)\$(PlatformTarge
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libewf-stable\include;$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libewf-stable\include;$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit-4.15.0;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -400,7 +400,7 @@ copy "$(Projectdir)..\..\..\aff4-cpp-lite\win32\x64\Release\libaff4-x64.pdb" "$(
     <ClCompile>
       <Optimization>Full</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libewf-exp\include;$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\libewf-exp\include;$(ProjectDir)..\..\..\libvmdk\include;$(ProjectDir)..\..\..\libvhdi\include;$(ProjectDir)..\..\..\openssl-1.1.1\win64.libs\include;$(ProjectDir)..\..\..\sleuthkit-4.15.0;$(ProjectDir)..\..\..\zlib;$(ProjectDir)..\..\..\aff4-cpp-lite\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_DEPRECATE;GUID_WINDOWS;_CRT_SECURE_NO_WARNINGS;HAVE_LIBEWF;HAVE_LIBOPENSSL;HAVE_LIBVMDK;HAVE_LIBVHDI;HAVE_LIBZ;WIN32;NDEBUG;_LIB;WINVER=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>

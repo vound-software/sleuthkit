@@ -174,8 +174,6 @@ unix_make_data_run_direct(TSK_FS_INFO * fs, TSK_FS_ATTR * fs_attr,
             // save the run
             last_run = tsk_fs_attr_vound_data_run_append(data_run, last_run, fs_attr);
 
-            tsk_fs_attr_append_run(fs, fs_attr, data_run);
-
             // get ready for the next run
             if (i + 1 != addr_len)
                 run_start = addrs[i + 1];
