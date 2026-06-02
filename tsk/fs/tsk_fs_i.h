@@ -209,7 +209,7 @@ extern "C" {
 	extern TSK_FS_INFO *logical_fs_open(TSK_IMG_INFO *);
 
     extern TSK_FS_INFO* xwfs2_open(TSK_IMG_INFO*, TSK_OFF_T,
-        TSK_FS_TYPE_ENUM, uint8_t);
+        TSK_FS_TYPE_ENUM, const char *, uint8_t);
 
     /* Specific pool file system routines */
     extern TSK_FS_INFO *apfs_open_auto_detect(TSK_IMG_INFO*, TSK_OFF_T,
@@ -291,6 +291,11 @@ extern "C" {
     typedef enum TSK_FS_USNJLS_FLAG_ENUM TSK_FS_USNJLS_FLAG_ENUM;
     extern uint8_t tsk_fs_usnjls(TSK_FS_INFO * fs, TSK_INUM_T inode,
         TSK_FS_USNJLS_FLAG_ENUM flags);
+
+
+    //--- vound egin
+    extern void tsk_fs_meta_close_vound_allocator(TSK_FS_META* fs_meta);
+    // -- vound  end
 
 
 // Endian macros - actual functions in misc/

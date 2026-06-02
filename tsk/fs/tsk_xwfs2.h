@@ -488,7 +488,7 @@ extern "C" {
 
     typedef struct {
         // object ID / GUID of the file
-        uint8_t objid1[4];   // little endian 4-byte value 
+        uint8_t objid1[4];   // little endian 4-byte value
         uint8_t objid2[2];   // little endian 2-byte value
         uint8_t objid3[2];  // little endian 2-byte value
         uint8_t objid4[2];  // big endian 2-byte value
@@ -760,8 +760,9 @@ extern "C" {
         int);
     extern TSK_RETVAL_ENUM xwfs2_dinode_lookup(NTFS_INFO*, char*,
         TSK_INUM_T);
+
     extern TSK_RETVAL_ENUM xwfs2_dir_open_meta(TSK_FS_INFO* a_fs,
-        TSK_FS_DIR** a_fs_dir, TSK_INUM_T a_addr);
+        TSK_FS_DIR** a_fs_dir, TSK_INUM_T a_addr, int recursion_depth);
 
     extern void xwfs2_orphan_map_free(NTFS_INFO* a_ntfs);
 

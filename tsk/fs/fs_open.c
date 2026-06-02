@@ -308,7 +308,7 @@ tsk_fs_open_img_decrypt(TSK_IMG_INFO * a_img_info, TSK_OFF_T a_offset,
         return apfs_open(a_img_info, a_offset, a_ftype, a_pass);
     }
     else if (TSK_FS_TYPE_ISXWFS2(a_ftype)) {
-        return xwfs2_open(a_img_info, a_offset, a_ftype, 0);
+        return xwfs2_open(a_img_info, a_offset, a_ftype, a_pass, 0);
     }
     tsk_error_reset();
     tsk_error_set_errno(TSK_ERR_FS_UNSUPTYPE);
