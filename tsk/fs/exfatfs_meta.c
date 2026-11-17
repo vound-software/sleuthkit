@@ -1382,7 +1382,7 @@ exfatfs_inode_copy_init(FATFS_INFO *a_fatfs, TSK_INUM_T a_inum,
     fs_meta->mtime_utc_offset = 0;
     fs_meta->atime_utc_offset = 0;
     fs_meta->ctime_utc_offset = 0;
-    fs_meta->crtime_utc_offset = 0;
+    fs_meta->crttime_utc_offset = 0;
     /* Metadata that does not exist in exFAT. */
     fs_meta->uid = 0;
     fs_meta->gid = 0;
