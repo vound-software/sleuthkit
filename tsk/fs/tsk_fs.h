@@ -473,12 +473,16 @@ extern "C" {
         /* @@@ Need to make these 64-bits ... ? */
         time_t mtime;           ///< last file content modification time (stored in number of seconds since Jan 1, 1970 UTC)
         uint32_t mtime_nano;    ///< nano-second resolution in addition to m_time
+        uint8_t mtime_utc_offset;
         time_t atime;           ///< last file content accessed time (stored in number of seconds since Jan 1, 1970 UTC)
         uint32_t atime_nano;    ///< nano-second resolution in addition to a_time
+        uint8_t atime_utc_offset;
         time_t ctime;           ///< last file / metadata status change time (stored in number of seconds since Jan 1, 1970 UTC)
         uint32_t ctime_nano;    ///< nano-second resolution in addition to c_time
+        uint8_t ctime_utc_offset;
         time_t crtime;          ///< Created time (stored in number of seconds since Jan 1, 1970 UTC)
         uint32_t crtime_nano;   ///< nano-second resolution in addition to cr_time
+        uint8_t crttime_utc_offset;
 
         /* filesystem specific times */
         union {

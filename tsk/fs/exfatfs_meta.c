@@ -1155,10 +1155,12 @@ exfatfs_copy_file_inode(FATFS_INFO *a_fatfs, TSK_INUM_T a_inum,
                 tsk_getu16(fs->endian, file_dentry->modified_time), 
                 file_dentry->modified_time_tenths_of_sec);
         fs_meta->mtime_nano = fatfs_dos_2_nanosec(file_dentry->modified_time_tenths_of_sec);
+        fs_meta->mtime_utc_offset = file_dentry->modified_time_time_zone_offset;
     }
     else {
         fs_meta->mtime = 0;
         fs_meta->mtime_nano = 0;
+        fs_meta->mtime_utc_offset = 0;
     }
 
     /* Copy the last accessed time, converted to UNIX date format. */
@@ -1166,10 +1168,13 @@ exfatfs_copy_file_inode(FATFS_INFO *a_fatfs, TSK_INUM_T a_inum,
         fs_meta->atime =
             fatfs_dos_2_unix_time(tsk_getu16(fs->endian, file_dentry->accessed_date), 
                 tsk_getu16(fs->endian, file_dentry->accessed_time), 0);
+        fs_meta->atime_utc_offset = file_dentry->accessed_time_time_zone_offset;
     }
     else {
         fs_meta->atime = 0;
+        fs_meta->atime_utc_offset = 0;
     }
+
     fs_meta->atime_nano = 0;
 
     /* exFAT does not have a last changed time. */
@@ -1183,10 +1188,13 @@ exfatfs_copy_file_inode(FATFS_INFO *a_fatfs, TSK_INUM_T a_inum,
                 tsk_getu16(fs->endian, file_dentry->created_time), 
                 file_dentry->created_time_tenths_of_sec);
         fs_meta->crtime_nano = fatfs_dos_2_nanosec(file_dentry->created_time_tenths_of_sec);
+        fs_meta->crttime_utc_offset = file_dentry->created_time_time_zone_offset;
+
     }
     else {
         fs_meta->crtime = 0;
         fs_meta->crtime_nano = 0;
+        fs_meta->crttime_utc_offset = 0;
     }
 
     /* Attempt to load the file stream entry that goes with this file entry. 
@@ -1371,6 +1379,10 @@ exfatfs_inode_copy_init(FATFS_INFO *a_fatfs, TSK_INUM_T a_inum,
     fs_meta->crtime = 0;
     fs_meta->crtime_nano = 0;
 
+    fs_meta->mtime_utc_offset = 0;
+    fs_meta->atime_utc_offset = 0;
+    fs_meta->ctime_utc_offset = 0;
+    fs_meta->crtime_utc_offset = 0;
     /* Metadata that does not exist in exFAT. */
     fs_meta->uid = 0;
     fs_meta->gid = 0;
